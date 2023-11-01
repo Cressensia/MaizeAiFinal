@@ -1,3 +1,4 @@
 RCNN/data/
 RCNN/__pycache__/
+RCNN/roi/
 RCNN/*.pth
