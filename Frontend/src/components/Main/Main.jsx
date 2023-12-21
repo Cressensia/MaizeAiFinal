@@ -119,7 +119,11 @@ export default function Main() {
           <div className="main-header">
             <h4>Results</h4>
           </div>
-          <div className="result-div"></div>
+          <div className="result-div">
+            {results && (
+              <img src={results.image_data} />
+            )}
+          </div>
           {results && (
             <div>
               <p>Tassel Count: {results.tassel_count}</p>
