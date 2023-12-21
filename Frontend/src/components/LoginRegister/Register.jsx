@@ -1,3 +1,5 @@
+// not is use. use Register3 instead
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import NavbarLogin from "./NavbarLogin";
@@ -131,7 +133,7 @@ export default function Register() {
             </Typography>
             <Stack spacing={1}>         
               <ThemeProvider theme={theme}>
-                <FormControl
+                {/* <FormControl  // old not working
                   sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
                   variant="outlined"
                 >
@@ -145,10 +147,25 @@ export default function Register() {
                     value={registerRequest.email}
                     label="email"
                   />
-                </FormControl>
+                </FormControl> */}
+                  <FormControl
+                sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
+                variant="outlined"
+              >
+                <InputLabel htmlFor="outlined-search">
+                  Email
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-search"         
+                  name="email"
+                  // onChange={handleInputChange}
+                  // value={loginRequest.email}
+                  label="email"
+                />
+              </FormControl>
               </ThemeProvider>
               <ThemeProvider theme={theme}>
-                <FormControl
+                {/* <FormControl
                   sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
                   variant="outlined"
                 >
@@ -175,7 +192,35 @@ export default function Register() {
                     }
                     label="Password"
                   />
-                </FormControl>
+                </FormControl> */}
+                <FormControl
+                sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
+                variant="outlined"
+              >
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  // onChange={handleInputChange}
+                  // value={loginRequest.password}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password"
+                />
+              </FormControl>
               </ThemeProvider>
               <CreateButton type="submit">
                 <Link className="login-link" to="/Main">

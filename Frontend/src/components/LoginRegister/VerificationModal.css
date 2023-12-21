@@ -1,0 +1,62 @@
+/* .ModalDialog{
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.ModalContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  } */
+
+  .ModalDialog {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .DialogTitle {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .ModalContent {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .Input {
+    width: 100%;
+    margin-bottom: 10px; 
+  }
+  
+  .Button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    margin-top: 20px; 
+    width: 100%;
+  }
+  
+  p {
+    text-align: center;
+    margin-bottom: 20px; 
+  }
+  
+  .weHave{
+    font-size: 12px;
+    font-weight: 700;
+  }
+.emailUser{
+    font-weight: bold;
+}
+
+

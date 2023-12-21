@@ -69,9 +69,10 @@
 }
 
 .productBanner {
-  width: 100%;
+  width: 90%;
   height: auto;
   padding: 0 36px;
+  margin-top: 4%;
 }
 
 .landingtwo-div {
@@ -189,7 +190,7 @@ p {
 .landing3-container > img {
   position: center;
   padding-top: 24px;
-  width: 73%;
+  width: 64%;
   height: 97%;
 }
 
@@ -207,6 +208,6 @@ p {
 .landing4-container > img {
   position: center;
   padding-top: 24px;
-  width: 73%;
+  width: 64%;
   height: 97%;
 }
