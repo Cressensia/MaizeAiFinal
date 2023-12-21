@@ -44,6 +44,7 @@ def handle_uploaded_file(f, filename):
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
     '''
+
     output_directory = os.path.join('MaizeAi/RCNN/output')
 
     # Call the ML script using subprocess
@@ -81,13 +82,21 @@ def image_upload_view(request):
             count_filepath = os.path.join('MaizeAi', 'RCNN', 'output', 'Count', f'{original_base_name}_{unique_identifier}.txt')
             with open(count_filepath, 'r') as f:
                 count = f.read()
+
+            output_filepath = os.path.join('MaizeAi', 'RCNN', 'output', 'detection', f'{original_base_name}_{unique_identifier}.jpg')
+            # print("\noutput_filepath: ", output_filepath)
+            with open(output_filepath, 'rb') as f:
+                image_data = f.read()    
             
             response_data = {
                 'tassel_count': count,
+                'image_data': image_data
+               
                 # Add any other data to return to the frontend 
             }
             print(count)
-            return JsonResponse({'tassel_count': count})
+            return JsonResponse({'tassel_count': count, 'image_data': image_data})
+        
         except Exception as e:
             import traceback
             traceback.print_exc()
