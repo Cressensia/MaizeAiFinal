@@ -9,5 +9,5 @@ Mask RCNN/*.jpg
 *.pth
 **/__pycache__/
 
-RCNN/input
-RCNN/output
+RCNN/input/
+RCNN/output/
