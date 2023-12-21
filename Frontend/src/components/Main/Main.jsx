@@ -57,7 +57,7 @@ export default function Main() {
 
       //now is local, Brenda, u try this on your local, if works ok liao, then we can try to deploy to aws
       const response = await axios.post(
-        "http://localhost:8000/maizeai/image_upload_view/",
+        "http://127.0.0.1:8000/maizeai/upload-image/",
         formData,
         {
           headers: {
