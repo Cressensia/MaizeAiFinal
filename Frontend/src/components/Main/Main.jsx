@@ -3,18 +3,24 @@ import NavbarMain from "./NavbarMain";
 import UploadPic from "../../images/upload-pic.png";
 import "../../App.css";
 import "./Main.css";
+import axios from "axios";
 
 export default function Main() {
   const [image, setImage] = useState(null);
+  const [results, setResults] = useState(null);
+  const [formData, setFormData] = useState(null);
 
   const handleFile = (e) => {
     const file = e.target.files[0];
+    const filename = e.target.files[0].name
+    console.log(filename)
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImage(event.target.result);
-      };
-      reader.readAsDataURL(file);
+      const newFormData = new FormData();
+      newFormData.append("file", file);
+      
+      setImage(URL.createObjectURL(file));
+      //console.log("Filename: ", file.name);
+      setFormData(newFormData);
     }
   };
 
@@ -30,6 +36,10 @@ export default function Main() {
       reader.onload = (e) => {
         // wait for image to load first
         setImage(e.target.result);
+        const newFormData = new FormData()
+        newFormData.append("file", file);
+        setFormData(newFormData);
+        uploadImageToServer(newFormData);
       };
       reader.readAsDataURL(file);
     }
@@ -37,6 +47,31 @@ export default function Main() {
 
   const handleReset = () => {
     setImage(null);
+    setResults(null);
+    setFormData(null);
+  };
+
+  const uploadImageToServer = async () => {
+    try {
+      //console.log("formData:", formData.entries());
+
+      //now is local, Brenda, u try this on your local, if works ok liao, then we can try to deploy to aws
+      const response = await axios.post(
+        "http://localhost:8000/maizeai/image_upload_view/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      // Assuming the response contains a field 'tassel_count'
+      setResults(response.data);
+      console.log(results)
+      console.log(`Tassel count: ${response.data.tassel_count}`);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
   };
 
   return (
@@ -76,6 +111,7 @@ export default function Main() {
           {image && (
             <div className="reset-button">
               <button onClick={handleReset}>Reset Image</button>
+              <button onClick={uploadImageToServer}>Process</button>
             </div>
           )}
         </div>
@@ -84,6 +120,11 @@ export default function Main() {
             <h4>Results</h4>
           </div>
           <div className="result-div"></div>
+          {results && (
+            <div>
+              <p>Tassel Count: {results.tassel_count}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -10,6 +10,8 @@
     "@mui/icons-material": "5.14.13",
     "@mui/joy": "5.0.0-beta.10",
     "@mui/material": "5.14.13",
+    "amazon-cognito-identity-js": "^6.3.7",
+    "axios": "^1.6.2",
     "csbbust": "1.0.1",
     "loader-utils": "3.2.1",
     "react": "18.2.0",
