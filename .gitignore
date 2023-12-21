@@ -4,7 +4,10 @@ RCNN/roi/
 RCNN/*.pth
 Mask RCNN/*.pth
 Mask RCNN/*.jpg
-
+Model inference/*.jpg
+Model inference/*.pth
+Model inference/input
+Model inference/output
 .DS_Store
 *.pth
 **/__pycache__/
