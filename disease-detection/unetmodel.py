@@ -12,22 +12,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-'''
-This model is a self-trained U-Net Model. 
-Current images trained: 228 items annotated + augmented on roboflow (mixture of blight, rust, spots and healthy leaves)
-File: maize leaf - disease.v7.coco
-Current diseases available:
-1. Maize Blight
-2. Common Rust
-3. Leaf Spot
-
-
-Future Implementations (as of 2/1/2024):
-1. Add more types of diseases (need more data + time to annotate)
-2. Find percentage of disease on leaf (maybe)
-3. Add description of how to treat disease
-4. Increase training speed 
-'''
 num_classes = 4 # 3 diseases rn + healthy class
 
 #class names must be same as roboflow (i think category_id)
