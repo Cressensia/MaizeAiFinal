@@ -120,7 +120,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-# Load and preprocess image
+# Load and preprocess image (file path needs to be changed)
 #img_dir =
 img_path = 'C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\valid\\leaf-blight134__jpg.rf.2d244808d87c78ec7976f91e6a45a2f6.jpg'
 img = Image.open(img_path).convert('RGB')
