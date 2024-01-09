@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./NavbarMain.css";
-import logo from "../../images/logo-name-horizontal.png";
+// import logo from "../../images/logo-name-horizontal.png";
+import logo2Main from "../../images/logo2Main.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Main from "./Main";
 import { Dropdown, Menu, MenuButton, MenuItem } from "@mui/joy";
@@ -39,10 +40,10 @@ export default function NavbarMain() {
   // const [accountData, setAccountData] = useState([])
   const navigate = useNavigate();
   return (
-    <div className="navbar">
-      <div className="navbar-container">
+    <div className="navbarMain">
+      <div className="navbarMain-container">
         <Link to="/Main">
-          <img className="nav-logo" src={logo} alt="Logo" />
+          <img className="nav2-logo" src={logo2Main} />
         </Link>
         <Dropdown className="menu">
           <MenuButton>

@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Inter");
 
-.navbar {
-  background: #1c2e1d;
+.navbarMain {
+  background: #fcfefc;
   height: 70px;
   display: flex;
   justify-content: flex;
@@ -11,7 +11,7 @@
   z-index: 1;
 }
 
-.navbar-container {
+.navbarMain-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -19,8 +19,10 @@
   width: 100%;
 }
 
-.nav-logo {
+.nav2-logo {
   position: relative;
+  margin-left: 10%;
+  width: 95px;
 }
 
 .nav-div {

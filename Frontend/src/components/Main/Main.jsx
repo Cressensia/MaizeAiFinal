@@ -4,6 +4,7 @@ import UploadPic from "../../images/upload-pic.png";
 import "../../App.css";
 import "./Main.css";
 import axios from "axios";
+import Sidebar from "./Sidebar";
 
 export default function Main() {
   const [image, setImage] = useState(null);
@@ -13,12 +14,12 @@ export default function Main() {
 
   const handleFile = (e) => {
     const file = e.target.files[0];
-    const filename = e.target.files[0].name
-    console.log(filename)
+    const filename = e.target.files[0].name;
+    console.log(filename);
     if (file) {
       const newFormData = new FormData();
       newFormData.append("file", file);
-      
+
       setImage(URL.createObjectURL(file));
       setFormData(newFormData);
     }
@@ -36,7 +37,7 @@ export default function Main() {
       reader.onload = (e) => {
         // wait for image to load first
         setImage(e.target.result);
-        const newFormData = new FormData()
+        const newFormData = new FormData();
         newFormData.append("file", file);
         setFormData(newFormData);
         uploadImageToServer(newFormData);
@@ -54,7 +55,7 @@ export default function Main() {
   const uploadImageToServer = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/maizeai/image_upload_view/",
+        "http://localhost:8000/maizeai/upload-image/",
         formData,
         {
           headers: {
@@ -74,6 +75,10 @@ export default function Main() {
     <div>
       <NavbarMain />
       <div className="main-container">
+        <div className="Sidebar">
+          <Sidebar />
+          {/* fix sidebar later on */}
+        </div>
         <div className="main-div">
           <div className="main-header">
             <h4>Count Maize Tassels</h4>
@@ -120,9 +125,13 @@ export default function Main() {
               <div className="image-div">
                 {processedImage && (
                   <img
-                      src={`data:image/jpeg;base64, ${processedImage}`}
-                      alt="Image with boxes"
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    src={`data:image/jpeg;base64, ${processedImage}`}
+                    alt="Image with boxes"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
                   />
                 )}
               </div>
