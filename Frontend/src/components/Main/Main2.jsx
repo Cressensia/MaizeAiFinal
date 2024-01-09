@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import NavbarMain from "./NavbarMain";
 import Sidebar from "./Sidebar";
 import "./Main2.css";
-import { Sheet, Table, Menu, MenuButton, MenuItem, Dropdown } from "@mui/joy";
+import { Sheet, Table, Menu, MenuButton, MenuItem, Dropdown, Divider } from "@mui/joy";
 
 export default function Main2() {
-
   const [results, setResults] = useState([
     // addhadgfgsjfggk
   ]);
@@ -19,63 +18,69 @@ export default function Main2() {
     // efdsfsdf
   };
 
-
-
   return (
-    <div>
+    <div className="all">
       <NavbarMain />
       <div className="main2-container">
-        <div className="Sidebar">
+        <div className="SidebarMain2">
           <Sidebar />
         </div>
-        <div className="main2-div"></div>
-        <div className="table">
-          <Sheet sx={{ height: 400, overflow: "auto" }}>
-            <Table
-              variant="soft"
-              aria-label="table with sticky header"
-              stickyHeader
-              stickyFooter
-              hoverRow
-            >
-              <thead>
-                <tr className="table-header">
-                  <th>No.</th>
-                  <th>Image</th>
-                  <th>Date of upload</th>
-                  <th>Results</th>
-                  <th>Tassel Counts</th>
-                  <th>Associated plots</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((result, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td><img src={result.imageUrl} alt={`Result ${index + 1}`} /></td>
-                    <td>{result.dateOfUpload}</td>
-                    <td>{result.results}</td>
-                    <td>{result.tasselCounts}</td>
-                    <td>{result.associatedPlots}</td>
-                    <td>
-                      <Dropdown>
-                        <MenuButton>...</MenuButton>
-                        <Menu>
-                          <MenuItem onClick={() => deleteRecord(result)}>
-                            Delete Record
-                          </MenuItem>
-                          <MenuItem onClick={() => updateAssociatedPlots(result)}>
-                            Update associated plots
-                          </MenuItem>
-                        </Menu>
-                      </Dropdown>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Sheet>
+        <div className="main2-div">
+          <div className="main2-divMaize">
+            <h2>Maize Counter</h2>
+            <Divider />
+            <h2>Results</h2>
+            <div className="table">
+              <Sheet sx={{ height: 400, overflow: "auto", borderRadius: 10, border: '2px solid rgba(0, 0, 0, 0.05)' }}>
+                {/* <Sheet > */}
+                <Table variant="outline" stickyHeader hoverRows >
+                  <thead>
+                    <tr className="table-header">
+                      <th>No.</th>
+                      <th>Image</th>
+                      <th>Date of upload</th>
+                      <th>Results</th>
+                      <th>Tassel Counts</th>
+                      <th>Associated plots</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map((result, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <img
+                            src={result.imageUrl}
+                            alt={`Result ${index + 1}`}
+                          />
+                        </td>
+                        <td>{result.dateOfUpload}</td>
+                        <td>{result.results}</td>
+                        <td>{result.tasselCounts}</td>
+                        <td>{result.associatedPlots}</td>
+                        <td>
+                          <Dropdown>
+                            <MenuButton>...</MenuButton>
+                            <Menu>
+                              <MenuItem onClick={() => deleteRecord(result)}>
+                                Delete Record
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => updateAssociatedPlots(result)}
+                              >
+                                Update associated plots
+                              </MenuItem>
+                            </Menu>
+                          </Dropdown>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Sheet>
+            </div>
+          </div>
         </div>
       </div>
     </div>
