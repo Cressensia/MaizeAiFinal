@@ -4,6 +4,9 @@ import Sidebar from "./Sidebar";
 import "./Main2.css";
 import { Sheet, Table, Menu, MenuButton, MenuItem, Dropdown, Divider } from "@mui/joy";
 
+import ModalUploadImage from './ModalUploadImage'; 
+
+
 export default function Main2() {
   const [results, setResults] = useState([
     // addhadgfgsjfggk
@@ -18,6 +21,12 @@ export default function Main2() {
     // efdsfsdf
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+
   return (
     <div className="all">
       <NavbarMain />
@@ -28,6 +37,7 @@ export default function Main2() {
         <div className="main2-div">
           <div className="main2-divMaize">
             <h2>Maize Counter</h2>
+            <button className="uploadImageButton " onClick={openModal}>Upload Image</button>
             <Divider />
             <h2>Results</h2>
             <div className="table">
@@ -83,6 +93,7 @@ export default function Main2() {
           </div>
         </div>
       </div>
+      <ModalUploadImage isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 }
