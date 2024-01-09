@@ -169,5 +169,5 @@ def create_prediction_image(img_tensor, predicted_mask, disease_name):
 
 # Create and display the prediction image
 prediction_image = create_prediction_image(img_tensor, predicted_mask, disease_name)
-prediction_image.save("prediction_output_test.png")  # Save the image
+prediction_image.save("prediction_output.png")  # Save the image
 prediction_image.show()  # Display the image
