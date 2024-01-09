@@ -171,8 +171,6 @@ def create_prediction_image(img_tensor, predicted_mask, disease_name):
         draw.text((10, 10), "Original Image:", fill="black") #fill=white
         draw.text((img_pil.width + 10, 10), f"Predicted Disease: {disease_name}", fill="black") #fill=white
     else:
-        # In case of a healthy leaf, we want to avoid the black square.
-        # So we don't double the width of the image, we just add text on the original image.
         draw.text((10, 10), "No Mask for Healthy Class. Leaf Inputted is Healthy.", fill="white") #fill=white
 
     return composite_image
