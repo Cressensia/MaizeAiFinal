@@ -3,15 +3,33 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import transforms
+from torchvision.transforms import ToPILImage
+import torchvision.transforms.functional as TF
 from torch.utils.data import DataLoader, Dataset
 from PIL import Image, ImageChops
 import os
 import json
 from pycocotools.coco import COCO
-import matplotlib.pyplot as plt
 import numpy as np
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+
+'''
+This model is a self-trained U-Net Model. 
+Current images trained: 228 items annotated + augmented on roboflow (mixture of blight, rust, spots and healthy leaves)
+File: maize leaf - disease.v7.coco
+Current diseases available:
+1. Maize Blight
+2. Common Rust
+3. Leaf Spot
+
+
+Future Implementations (as of 2/1/2024):
+1. Add more types of diseases (need more data + time to annotate)
+2. Find percentage of disease on leaf (scrap)
+3. Add description of how to treat disease
+4. Increase training speed 
+'''
 num_classes = 4 # 3 diseases rn + healthy class
 
 #class names must be same as roboflow (i think category_id)
@@ -41,37 +59,35 @@ class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
         
-        # Encoder (Contracting Path)
-        self.enc_conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
-        self.enc_bn1 = nn.BatchNorm2d(64)  # Batch Normalization
-        self.enc_conv2 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
-        self.enc_bn2 = nn.BatchNorm2d(64)  # Batch Normalization
+        # Encoder (Contracting Path) - Reduced number of filters for faster training
+        self.enc_conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.enc_bn1 = nn.BatchNorm2d(32)
+        self.enc_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
+        self.enc_bn2 = nn.BatchNorm2d(32)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        # More layers add here for depth
-
         # Middle part (Bottleneck)
-        self.middle_conv1 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.middle_bn1 = nn.BatchNorm2d(128)  # Batch Normalization
-        self.middle_conv2 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
-        self.middle_bn2 = nn.BatchNorm2d(128)  # Batch Normalization
+        self.middle_conv1 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.middle_bn1 = nn.BatchNorm2d(64)
+        self.middle_conv2 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
+        self.middle_bn2 = nn.BatchNorm2d(64)
 
         # Decoder (Expansive Path)
-        self.up_conv1 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
-        self.dec_conv1 = nn.Conv2d(128, 64, kernel_size=3, padding=1)
-        self.dec_bn1 = nn.BatchNorm2d(64)  # Batch Normalization
-        self.dec_conv2 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
-        self.dec_bn2 = nn.BatchNorm2d(64)  # Batch Normalization
+        self.up_conv1 = nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2)
+        self.dec_conv1 = nn.Conv2d(64, 32, kernel_size=3, padding=1)
+        self.dec_bn1 = nn.BatchNorm2d(32)
+        self.dec_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
+        self.dec_bn2 = nn.BatchNorm2d(32)
 
-        # Dropout for regularization
-        self.dropout = nn.Dropout(0.5)
+        # Dropout for regularization - Adjusted dropout rate
+        self.dropout = nn.Dropout(0.3)
 
         # Final convolution
-        self.final_conv = nn.Conv2d(64, 1, kernel_size=1) #change here if multiclass cause now binary (disease vs no disease)
+        self.final_conv = nn.Conv2d(32, 1, kernel_size=1)
 
         # Classification layers
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc1 = nn.Linear(128, 64)
+        self.fc1 = nn.Linear(64, 64)
         self.fc2 = nn.Linear(64, num_classes)
 
     def forward(self, x):
@@ -145,15 +161,11 @@ class MaizeDataset(Dataset):
         self.transform = transform
         self.coco = COCO(annotation_file)
         self.ids = list(sorted(self.coco.imgs.keys()))
-        
-        # Load disease types
+
         if disease_to_id is not None:
             self.disease_types = load_disease_types(annotation_file, disease_to_id)
         else:
-            # Handle the case where disease_to_id is not provided
             self.disease_types = {}
-
-        # Map from disease name to class index
         self.disease_to_id = disease_to_id
 
     def __getitem__(self, index):
@@ -244,11 +256,12 @@ def create_dataset(image_dir, transform, disease_to_id):
         return None, None
 
 # Create the training and validation datasets
-train_dataset, train_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v7i.coco-segmentation\\train', 
-                                                      transform, 
-                                                      disease_to_id)
+train_dataset, train_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\train', 
+    transform, 
+    disease_to_id=disease_to_id
+)
 
-val_dataset, val_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v7i.coco-segmentation\\valid', 
+val_dataset, val_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\valid', 
                                                   transform, 
                                                   disease_to_id)
 
@@ -325,17 +338,16 @@ def validate_model(model, val_loader, segmentation_criterion, classification_cri
     return val_loss, val_acc, val_iou
 
 num_epochs = 100
-patience = 10
-optimizer = optim.Adam(model.parameters(), lr=1e-4)
+patience = 15
+optimizer = optim.AdamW(model.parameters(), lr=0.001)
 #find optimal learning rate - reduce learning rate when metric stops improving
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=patience)
+# Using ReduceLROnPlateau for dynamic LR adjustment
+scheduler = ReduceLROnPlateau(optimizer, 'min', patience=patience, factor=0.5)
 
 def train_model(model, train_loader, val_loader, segmentation_criterion, classification_criterion, optimizer, num_epochs, patience):
     best_loss = float('inf')
     epochs_no_improve = 0
     early_stop = False
-
-    scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=patience//2, factor=0.1, verbose=True)
 
     for epoch in range(num_epochs):
         if early_stop:
@@ -386,15 +398,14 @@ def train_model(model, train_loader, val_loader, segmentation_criterion, classif
         if val_loss < best_loss:
             best_loss = val_loss
             epochs_no_improve = 0
-            torch.save(model.state_dict(), 'unetmodel_best.pth')  # Save the best model
+            torch.save(model.state_dict(), 'unet_best.pth')  # Save the best model
             
         else:
             epochs_no_improve += 1
-
-        # Check for early stopping
-        if epochs_no_improve >= patience:
-            print(f'Early stopping triggered after {epoch + 1} epochs!')
-            early_stop = True
+            if epochs_no_improve == patience:
+                early_stop = True
+                print(f'Early stopping triggered after {epoch + 1} epochs!')
+        
         
         # Log epoch metrics
         print(f'Epoch {epoch + 1}/{num_epochs}')
@@ -409,57 +420,71 @@ trained_model = train_model(model, train_loader, val_loader, segmentation_criter
 #reverse mapping
 id_to_disease = {v: k for k, v in disease_to_id.items()}
 
-def visualize_predictions(model, DataLoader, num_images, disease_mapping=disease_mapping):
+
+'''
+def predict(img_tensor, model):
+    # Ensure the model is in evaluation mode
     model.eval()
-    images_processed = 0
 
+    # Assuming img_tensor is already preprocessed and ready for model input
+    # If img_tensor is a single image, add a batch dimension
+    if len(img_tensor.shape) == 3:
+        img_tensor = img_tensor.unsqueeze(0)
+
+    # No need to send to device in this snippet. Assuming it's done outside
     with torch.no_grad():
-        for images, masks, labels in DataLoader:
-            if images_processed >= num_images:
-                break
+        # Forward pass
+        mask_output, class_output = model(img_tensor)
 
-            segmentation_output, classification_output = model(images)
-            _, predicted_labels = torch.max(classification_output, 1)
+        # Get predicted class
+        _, predicted_class = torch.max(class_output, 1)
+        predicted_disease = predicted_class.item()
 
-            # Apply sigmoid to segmentation output to get probabilities
-            segmentation_predictions = torch.sigmoid(segmentation_output) > 0.5
+        # Get the segmentation mask
+        predicted_mask = torch.sigmoid(mask_output[0])  # First item in batch
+        predicted_mask = (predicted_mask > 0.5).float()  # Binarize mask
 
-            for i in range(images.shape[0]):
-                if images_processed >= num_images:
-                    break
-
-                plt.figure(figsize=(12, 6))
-
-                # Check if the predicted class is not 'healthy'
-                if disease_mapping and disease_mapping.get(predicted_labels[i].item()) != "healthy":
-                    
-                    # Original Image
-                    plt.subplot(1, 2, 1)
-                    plt.imshow(np.transpose(images[i].cpu().numpy(), (1, 2, 0)))
-                    plt.title('Original Image')
-                    plt.axis('off')
-
-                    # Overlayed Image
-                    plt.subplot(1, 2, 2)
-                    plt.imshow(np.transpose(images[i].cpu().numpy(), (1, 2, 0)))
-                    plt.imshow(segmentation_predictions[i].cpu().numpy().squeeze(), cmap='Reds', alpha=0.5)
-
-                    # Display Predicted Disease Type
-                    disease_name = disease_mapping.get(predicted_labels[i].item(), "Unknown")
-                    plt.title(f'Predicted Disease: {disease_name}')
-                    plt.axis('off')
-                    
-                else:
-                    plt.subplot(1, 2, 2)
-                    plt.imshow(np.transpose(images[i].cpu().numpy(), (1, 2, 0)))
-                    plt.title('No Mask for Healthy Class. Leaf Inputted is Healthy.')
-                    plt.axis('off')
+    return predicted_mask, predicted_disease
 
 
-                plt.show()
-                images_processed += 1
+def create_prediction_image(img_tensor, predicted_mask, disease_name):
+    # Convert tensor to PIL image
+    to_pil = ToPILImage()
+    img_pil = to_pil(img_tensor.cpu()).convert("RGB")
 
+    # Convert the predicted mask to a PIL image and resize to match the original image
+    mask_pil = to_pil(predicted_mask.cpu().squeeze()).convert("L")
+    mask_pil = mask_pil.resize(img_pil.size)
 
+    # Create a red mask
+    mask_color = Image.new("RGB", mask_pil.size, (255, 0, 0))
+    mask_pil_colored = ImageChops.multiply(mask_color, mask_pil.convert("RGB"))
 
-# Visualize predictions
-visualize_predictions(trained_model, val_loader, num_images=10, disease_mapping=disease_mapping)
+    # Combine original image and red mask
+    img_with_mask = ImageChops.add(img_pil, mask_pil_colored)
+    
+    # Create a blank image with double width to hold both images side by side
+    composite_image = Image.new('RGB', (img_pil.width * 2, img_pil.height))
+    composite_image.paste(img_pil, (0, 0))
+    composite_image.paste(img_with_mask, (img_pil.width, 0))
+
+    # Add titles
+    draw = ImageDraw.Draw(composite_image)
+    draw.text((10, 10), "Original Image", fill="white")
+    draw.text((img_pil.width + 10, 10), f"Masked Image: {disease_name}", fill="white")
+
+    return composite_image
+
+# Fetch a random image from the validation dataset
+random_idx = random.randint(0, len(val_dataset) - 1)
+img_tensor, mask_tensor, class_label = val_dataset[random_idx]
+
+# Predict using the model
+predicted_mask, predicted_disease = predict(img_tensor.unsqueeze(0), model)
+disease_name = disease_mapping[predicted_disease]
+
+# Usage
+prediction_image = create_prediction_image(img_tensor, predicted_mask, disease_name)
+prediction_image.save("prediction_output.png")  # Save the image
+prediction_image.show()  # Display the image
+'''
