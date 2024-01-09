@@ -120,9 +120,9 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-# Load and preprocess image (file path needs to be changed)
+# Load and preprocess image
 #img_dir =
-img_path = 'C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\valid\\leaf-blight134__jpg.rf.2d244808d87c78ec7976f91e6a45a2f6.jpg'
+img_path = 'C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\valid\\healthy125__jpg.rf.7764a1fa47190ada9968fb2b15814c25.jpg'
 img = Image.open(img_path).convert('RGB')
 img_tensor = transform(img)
 
@@ -144,30 +144,40 @@ def create_prediction_image(img_tensor, predicted_mask, disease_name):
     to_pil = ToPILImage()
     img_pil = to_pil(img_tensor.cpu()).convert("RGB")
 
-    # Convert the predicted mask to a PIL image and resize to match the original image
-    mask_pil = to_pil(predicted_mask.cpu().squeeze()).convert("L")
-    mask_pil = mask_pil.resize(img_pil.size)
+    # Initialize the composite image as just the original image
+    composite_image = img_pil
 
-    # Create a red mask
-    mask_color = Image.new("RGB", mask_pil.size, (255, 0, 0))
-    mask_pil_colored = ImageChops.multiply(mask_color, mask_pil.convert("RGB"))
+    if disease_name != "healthy":
+        # Create a blank image with double width to hold both images side by side
+        composite_image = Image.new('RGB', (img_pil.width * 2, img_pil.height))
+        composite_image.paste(img_pil, (0, 0))
 
-    # Combine original image and red mask
-    img_with_mask = ImageChops.add(img_pil, mask_pil_colored)
-    
-    # Create a blank image with double width to hold both images side by side
-    composite_image = Image.new('RGB', (img_pil.width * 2, img_pil.height))
-    composite_image.paste(img_pil, (0, 0))
-    composite_image.paste(img_with_mask, (img_pil.width, 0))
+        # Convert the predicted mask to a PIL image and resize to match the original image
+        mask_pil = to_pil(predicted_mask.cpu().squeeze()).convert("L")
+        mask_pil = mask_pil.resize(img_pil.size)
+
+        # Create a red mask
+        mask_color = Image.new("RGB", mask_pil.size, (255, 0, 0))
+        mask_pil_colored = ImageChops.multiply(mask_color, mask_pil.convert("RGB"))
+
+        # Combine original image and red mask
+        img_with_mask = ImageChops.add(img_pil, mask_pil_colored)
+        composite_image.paste(img_with_mask, (img_pil.width, 0))
 
     # Add titles
     draw = ImageDraw.Draw(composite_image)
-    draw.text((10, 10), "Original Image", fill="white")
-    draw.text((img_pil.width + 10, 10), f"Masked Image: {disease_name}", fill="white")
+    
+    if disease_name != "healthy":
+        draw.text((10, 10), "Original Image:", fill="black") #fill=white
+        draw.text((img_pil.width + 10, 10), f"Predicted Disease: {disease_name}", fill="black") #fill=white
+    else:
+        # In case of a healthy leaf, we want to avoid the black square.
+        # So we don't double the width of the image, we just add text on the original image.
+        draw.text((10, 10), "No Mask for Healthy Class. Leaf Inputted is Healthy.", fill="white") #fill=white
 
     return composite_image
 
 # Create and display the prediction image
 prediction_image = create_prediction_image(img_tensor, predicted_mask, disease_name)
-prediction_image.save("prediction_output.png")  # Save the image
+prediction_image.save("prediction_output_test.png")  # Save the image
 prediction_image.show()  # Display the image
