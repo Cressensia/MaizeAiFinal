@@ -22,12 +22,12 @@ export default function Navbar() {
           </div>
           <ul className={click ? "nav-menu active" : "nav-menu"}>
             <li className="nav-item">
-              <Link to="/" className="nav-links" onClick={closeMobileMenu}>
+              <Link to="/WhyMaizeTassels" className="nav-links" onClick={closeMobileMenu}>
                 Why Maize Tassels
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/" className="nav-links" onClick={closeMobileMenu}>
+              <Link to="/CountWithUs" className="nav-links" onClick={closeMobileMenu}>
                 Count With Us
               </Link>
             </li>
