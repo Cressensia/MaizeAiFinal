@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+// import { Link, useHistory } from "react-router-dom";
 import NavbarLogin from "./NavbarLogin";
 import "../../App.css";
 import {
@@ -55,30 +56,96 @@ export default function Register3() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+  // const onSubmit = (event) => {
+  //   event.preventDefault();
+
+  //   if (!email || !password) {
+  //     alert("Please enter both email and password.");
+  //     return;
+  //   }
+
+  //   UserPool.signUp(email, password, [], null, (err, data) => {
+  //     if (err) {
+  //       if (err.code === "UsernameExistsException") {
+  //         alert("User already exists. Please verify your email.");
+  //         openVerificationModal(); // Reopen the modal for verification
+  //       } else if (err.code === "LimitExceededException") {
+  //         alert("Exceeded daily email limit for the operation or the account. Please try again later or contact support for assistance.");
+  //       } else {
+  //         console.error(err);
+  //         alert("An error occurred during registration. Please try again.");
+  //       }
+  //       return;
+  //     }
+
+  //     const cognitoUser = new CognitoUser({
+  //       Username: data.user.getUsername(),
+  //       Pool: UserPool,
+  //     });
+
+  //     setUser(cognitoUser);
+  //     openVerificationModal();
+  //   });
+  // };
+
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+    return (
+      password.length >= minLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumber &&
+      hasSpecialChar
+    );
+  };
 
   const onSubmit = (event) => {
     event.preventDefault();
 
+    // Prevent multiple submissions
+    if (isSubmitting) {
+        return;
+    }
+    setIsSubmitting(true); // Start of submission process
+
+    // Check if email and password are provided
     if (!email || !password) {
       alert("Please enter both email and password.");
+      setIsSubmitting(false); // Reset submission status
       return;
     }
 
+    if (!validatePassword(password)) {
+      alert("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Proceed with UserPool signUp
     UserPool.signUp(email, password, [], null, (err, data) => {
-      // if (err) {
-      //   console.error(err);
-      //   return;
-      // }
       if (err) {
         if (err.code === "UsernameExistsException") {
           alert("User already exists. Please verify your email.");
           openVerificationModal(); // Reopen the modal for verification
+        } else if (err.code === "LimitExceededException") {
+          alert("Exceeded daily email limit for the operation or the account. Please try again later or contact support for assistance.");
         } else {
           console.error(err);
+          alert("An error occurred during registration. Please try again.");
         }
+        setIsSubmitting(false); // Reset submission status
         return;
       }
 
+      // Successful registration
       const cognitoUser = new CognitoUser({
         Username: data.user.getUsername(),
         Pool: UserPool,
@@ -86,12 +153,16 @@ export default function Register3() {
 
       setUser(cognitoUser);
       openVerificationModal();
+
+      setIsSubmitting(false); // Reset submission status
     });
-  };
+};
+
+
 
   return (
     <div>
-        <NavbarLogin />
+      <NavbarLogin />
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box
@@ -205,6 +276,7 @@ export default function Register3() {
                     fullWidth
                     variant="contained"
                     color="primary"
+                    disabled={isSubmitting}
                     sx={{
                       mt: 3,
                       mb: 2,
@@ -220,7 +292,10 @@ export default function Register3() {
                       marginTop: "20px",
                     }}
                   >
-                    <Link href="/Login" variant="body2">
+                    <Link
+                      href="/Login"
+                      variant="body2"
+                    >
                       Already have an account? Login
                     </Link>
                   </Box>
