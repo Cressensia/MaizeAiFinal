@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 from django.http import HttpResponse
 import os
@@ -56,40 +55,47 @@ def handle_uploaded_file(f, filename):
     
     return full_path, original_base_name, unique_identifier
 
-# View to handle image uploads from the frontend
-@csrf_exempt  
+
+
+@csrf_exempt
 def image_upload_view(request):
-    if request.method == 'POST' and request.FILES['file']:
+    print("Request Method:", request.method)
+    print("Request Files:", request.FILES)
+    if request.method == 'POST' and request.FILES.getlist('files'):
         # Save the uploaded image and call the ML script
         print(request)
-        print(request.FILES['file'])
-        image = request.FILES['file']
+        print(request.FILES.getlist('files')) # update to list
+        images = request.FILES.getlist('files')
 
         try:
-            image_path, original_base_name, unique_identifier = handle_uploaded_file(image, image.name)
-            
-            # Assuming the ML script saves the processed image as 'processed.jpg' in the output directory
-            #image_with_boxes = os.path.join(output_directory, 'processed.jpg')
-            
-            # Generate the response data
-            count_filepath = os.path.join('MaizeAi', 'RCNN', 'output', 'Count', f'{original_base_name}_{unique_identifier}.txt')
-            with open(count_filepath, 'r') as f:
-                count = f.read()
+            response_data = {'results': [], 'total_count': 0}
 
-            output_filepath = os.path.join('MaizeAi', 'RCNN', 'output', 'detection', f'{original_base_name}_{unique_identifier}_with_boxes.jpg')
-            
-            with open(output_filepath, 'rb') as f:
-                image_data = base64.b64encode(f.read()).decode('utf-8')
-            
-            response_data = {
-                'tassel_count': count,
-                'image_data': image_data
-                # Add any other data to return to the frontend 
-            }
-            print(count)
+            for image in images:
+                image_path, original_base_name, unique_identifier = handle_uploaded_file(image, image.name)
+                print(f"processing {image.name}")
+
+                count_filepath = os.path.join('MaizeAi', 'RCNN', 'output', 'Count', f'{original_base_name}_{unique_identifier}.txt')
+                with open(count_filepath, 'r') as f:
+                    count = f.read()
+                    print(f"{original_base_name}_{unique_identifier}.jpg : {count}")
+
+                output_filepath = os.path.join('MaizeAi', 'RCNN', 'output', 'detection', f'{original_base_name}_{unique_identifier}_with_boxes.jpg')
+                print(f"output path: {output_filepath}")
+
+                with open(output_filepath, 'rb') as f:
+                    image_data = base64.b64encode(f.read()).decode('utf-8')
+
+                response_data['results'].append({
+                    'tassel_count': count,
+                    'image_data': image_data
+                    # Add any other data to return to the frontend
+                })
+
+                response_data['total_count'] += int(count)
+                print(response_data['results'][-1]['tassel_count'])
+
             return JsonResponse(response_data)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'No image provided'}, status=400)
-

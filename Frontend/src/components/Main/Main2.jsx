@@ -8,13 +8,12 @@ import ModalUploadImage from './ModalUploadImage';
 
 
 export default function Main2() {
-  const [results, setResults] = useState([
-    // addhadgfgsjfggk
-  ]);
+  const [results, setResults] = useState([]);
 
-  // Dummy function placeholders for your modal handlers
-  const deleteRecord = (result) => {
-    //sahdfksffksfdsfsdf
+  const deleteRecord = (index) => {
+    const updatedResults = [...results]; // duplicate current array
+    updatedResults.splice(index, 1);
+    setResults(updatedResults);
   };
 
   const updateAssociatedPlots = (result) => {
@@ -25,6 +24,20 @@ export default function Main2() {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const handleFileUpload = (allData) => {
+    const newResults = allData.originalImages.map((result, index) => ({
+      originalImage: result.blobUrl,
+      processedImage: allData.processedResults[index].image_data,
+      tassel_count: allData.processedResults[index].tassel_count,
+      dateOfUpload: new Date().toLocaleDateString(),
+      associatedPlots: "", // not yet implemented
+      total_count: allData.total,
+    }));
+
+    setResults((prevResults) => [...prevResults, ...newResults]);
+    closeModal(); // Close the modal after upload
+  };
 
 
   return (
@@ -55,25 +68,30 @@ export default function Main2() {
                       <th></th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="result-list">
                     {results.map((result, index) => (
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>
-                          <img
-                            src={result.imageUrl}
-                            alt={`Result ${index + 1}`}
+                          <img className="result-image"
+                            src={result.originalImage}
+                            alt={`Original image ${index + 1}`}
                           />
                         </td>
                         <td>{result.dateOfUpload}</td>
-                        <td>{result.results}</td>
-                        <td>{result.tasselCounts}</td>
+                        <td>
+                          <img className="result-image"
+                            src={`data:image/jpeg;base64, ${result.processedImage}`}
+                            alt={`Processed image ${index + 1}`}
+                          />
+                        </td>
+                        <td>{result.tassel_count}</td>
                         <td>{result.associatedPlots}</td>
                         <td>
                           <Dropdown>
                             <MenuButton>...</MenuButton>
                             <Menu>
-                              <MenuItem onClick={() => deleteRecord(result)}>
+                              <MenuItem onClick={() => deleteRecord(index)}>
                                 Delete Record
                               </MenuItem>
                               <MenuItem
@@ -93,7 +111,7 @@ export default function Main2() {
           </div>
         </div>
       </div>
-      <ModalUploadImage isOpen={isModalOpen} onClose={closeModal} />
+      <ModalUploadImage isOpen={isModalOpen} onClose={closeModal} onFileUpload={handleFileUpload} />
     </div>
   );
 }

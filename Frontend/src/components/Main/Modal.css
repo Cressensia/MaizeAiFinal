@@ -1,0 +1,64 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+  
+.modal {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Roboto";
+}
+
+.upload-title {
+    text-align: left;
+}
+  
+.fileInput {
+    margin: 10px 0;
+}
+  
+.filePreviewContainer {
+    align-self: stretch;
+    margin: 10px;
+    height: 240px;
+    overflow-y: auto;
+}
+  
+.filePreview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+  
+.modalActions {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.upload-div {
+    border-radius: 10px;
+    border: 2px dashed #749289;
+}
+
+.image-preview {
+    width: 70px;
+    height: 50px;
+}
+
