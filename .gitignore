@@ -19,3 +19,4 @@ YOLO/mtdc/
 YOLO/uav/
 YOLO/runs/
 YOLO/Segmentation/weights/
+YOLO/*.pt
