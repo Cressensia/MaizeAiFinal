@@ -95,3 +95,9 @@
   right: 70px;
  
 }
+
+.result-image {
+width: 120px;
+height: 90px;
+border-radius: 10px;
+}
