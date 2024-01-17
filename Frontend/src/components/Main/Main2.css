@@ -20,15 +20,19 @@
 .main2-div{
   background: #EFEFEF;
   height: 100vh;
-  width: 100%;
+  /* width: 86%; */
+  width: auto;
   border-radius: 20px;
   /* justify-content: center; */
 }
 
-.main2-divMaize{
+
+
+.main2-divMaize{    
   background: #ffffff;
   height: 92%;
-  width: 98%;
+  /* width: 98%; */
+  width: auto;
   margin:2% ;
   border-radius: 20px;
   /* justify-content: center; */
@@ -60,9 +64,11 @@
 }
 
 .table {
-  padding-left: 2%;
+  /* padding-left: 2%; */
+  padding: 2%;
   /* border-radius: 10%; */
-  width: 1500px;
+  /* width: 1200px; */
+  width:auto;
   display: sticky;
   position: relative;
   justify-content: center;
@@ -96,8 +102,58 @@
  
 }
 
-.result-image {
-width: 120px;
-height: 90px;
-border-radius: 10px;
+
+.result-image{
+  width: 100px; 
+  height: auto; 
+  cursor: pointer;
+  border-radius: 10px;
 }
+
+/*------- for image preview -------*/
+.image-preview-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+ 
+}
+
+.image-preview-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  max-height: 80%;
+  max-width: 80%;
+  overflow: auto;
+  width: 80vw; 
+  height: 80vh; 
+}
+
+
+.image-preview-full {
+  width: auto;
+  height: auto; 
+  max-width: 100%;
+  max-height: 75vh; 
+  object-fit: scale-down; 
+}
+
+.image-preview-close-btn {
+  background: #414D3C;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  padding: 10px 20px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+/*------- ------------ ------*/

@@ -2,10 +2,17 @@ import React, { useState } from "react";
 import NavbarMain from "./NavbarMain";
 import Sidebar from "./Sidebar";
 import "./Main2.css";
-import { Sheet, Table, Menu, MenuButton, MenuItem, Dropdown, Divider } from "@mui/joy";
+import {
+  Sheet,
+  Table,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Dropdown,
+  Divider,
+} from "@mui/joy";
 
-import ModalUploadImage from './ModalUploadImage'; 
-
+import ModalUploadImage from "./ModalUploadImage";
 
 export default function Main2() {
   const [results, setResults] = useState([]);
@@ -39,6 +46,19 @@ export default function Main2() {
     closeModal(); // Close the modal after upload
   };
 
+  //preview image
+  const [previewImage, setPreviewImage] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const openPreview = (image) => {
+    setPreviewImage(image);
+    setIsPreviewOpen(true);
+  };
+
+  const closePreview = () => {
+    setPreviewImage(null);
+    setIsPreviewOpen(false);
+  };
 
   return (
     <div className="all">
@@ -50,13 +70,22 @@ export default function Main2() {
         <div className="main2-div">
           <div className="main2-divMaize">
             <h2>Maize Counter</h2>
-            <button className="uploadImageButton " onClick={openModal}>Upload Image</button>
+            <button className="uploadImageButton " onClick={openModal}>
+              Upload Image
+            </button>
             <Divider />
             <h2>Results</h2>
             <div className="table">
-              <Sheet sx={{ height: 400, overflow: "auto", borderRadius: 10, border: '2px solid rgba(0, 0, 0, 0.05)' }}>
+              <Sheet
+                sx={{
+                  height: 400,
+                  overflow: "auto",
+                  borderRadius: 10,
+                  border: "2px solid rgba(0, 0, 0, 0.05)",
+                }}
+              >
                 {/* <Sheet > */}
-                <Table variant="outline" stickyHeader hoverRows >
+                <Table variant="outline" stickyHeader hoverRows>
                   <thead>
                     <tr className="table-header">
                       <th>No.</th>
@@ -73,16 +102,20 @@ export default function Main2() {
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>
-                          <img className="result-image"
+                          <img
+                            className="result-image"
                             src={result.originalImage}
                             alt={`Original image ${index + 1}`}
+                            onClick={() => openPreview(result.originalImage)}
                           />
                         </td>
                         <td>{result.dateOfUpload}</td>
                         <td>
-                          <img className="result-image"
+                          <img
+                            className="result-image"
                             src={`data:image/jpeg;base64, ${result.processedImage}`}
                             alt={`Processed image ${index + 1}`}
+                            onClick={() => openPreview(result.originalImage)}
                           />
                         </td>
                         <td>{result.tassel_count}</td>
@@ -111,7 +144,29 @@ export default function Main2() {
           </div>
         </div>
       </div>
-      <ModalUploadImage isOpen={isModalOpen} onClose={closeModal} onFileUpload={handleFileUpload} />
+      <ModalUploadImage
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onFileUpload={handleFileUpload}
+      />
+      {isPreviewOpen && (
+        <div className="image-preview-modal-overlay" onClick={closePreview}>
+          <div
+            className="image-preview-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              className="image-preview-full"
+              src={previewImage}
+              alt="Enlarged preview"
+            />
+            <button className="image-preview-close-btn" onClick={closePreview}>
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    
     </div>
   );
 }
