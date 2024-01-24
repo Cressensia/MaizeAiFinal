@@ -17,37 +17,38 @@ num_classes = 4
 class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
-        
-        # Encoder (Contracting Path) - Reduced number of filters for faster training
-        self.enc_conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
-        self.enc_bn1 = nn.BatchNorm2d(32)
-        self.enc_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.enc_bn2 = nn.BatchNorm2d(32)
+
+        # Encoder
+        self.enc_conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
+        self.enc_bn1 = nn.BatchNorm2d(16)
+        self.enc_conv2 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
+        self.enc_bn2 = nn.BatchNorm2d(16)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
 
         # Middle part (Bottleneck)
-        self.middle_conv1 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.middle_bn1 = nn.BatchNorm2d(64)
-        self.middle_conv2 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
-        self.middle_bn2 = nn.BatchNorm2d(64)
+        self.middle_conv1 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
+        self.middle_bn1 = nn.BatchNorm2d(32)
+        self.middle_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
+        self.middle_bn2 = nn.BatchNorm2d(32)
 
-        # Decoder (Expansive Path)
-        self.up_conv1 = nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2)
-        self.dec_conv1 = nn.Conv2d(64, 32, kernel_size=3, padding=1)
-        self.dec_bn1 = nn.BatchNorm2d(32)
-        self.dec_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.dec_bn2 = nn.BatchNorm2d(32)
+        # Decoder
+        self.up_conv1 = nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2)
+        self.dec_conv1 = nn.Conv2d(32, 16, kernel_size=3, padding=1)
+        self.dec_bn1 = nn.BatchNorm2d(16)
+        self.dec_conv2 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
+        self.dec_bn2 = nn.BatchNorm2d(16)
 
-        # Dropout for regularization - Adjusted dropout rate
+        # Keep the dropout rate the same for now
         self.dropout = nn.Dropout(0.3)
 
         # Final convolution
-        self.final_conv = nn.Conv2d(32, 1, kernel_size=1)
+        self.final_conv = nn.Conv2d(16, 1, kernel_size=1)
 
-        # Classification layers
+        # Classification layers - Adjusted to match the new filter sizes
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc1 = nn.Linear(64, 64)
-        self.fc2 = nn.Linear(64, num_classes)
+        self.fc1 = nn.Linear(32, 32)
+        self.fc2 = nn.Linear(32, num_classes)
+        
 
     def forward(self, x):
         # Encoder
@@ -100,80 +101,69 @@ def predict(img_tensor, model):
     if len(img_tensor.shape) == 3:
         img_tensor = img_tensor.unsqueeze(0)
 
-    # No need to send to device in this snippet. Assuming it's done outside
+    # Forward pass
     with torch.no_grad():
-        # Forward pass
         mask_output, class_output = model(img_tensor)
 
-        # Get predicted class
+        # Process outputs
         _, predicted_class = torch.max(class_output, 1)
         predicted_disease = predicted_class.item()
-
-        # Get the segmentation mask
-        predicted_mask = torch.sigmoid(mask_output[0])  # First item in batch
+        predicted_mask = torch.sigmoid(mask_output[0]).float()  # First item in batch
         predicted_mask = (predicted_mask > 0.5).float()  # Binarize mask
 
-    return predicted_mask, predicted_disease
+    return predicted_mask.cpu(), predicted_disease  # Move data back to CPU for further processing
+
 
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
     transforms.ToTensor(),
 ])
 
-# Load and preprocess image
+# Load and preprocess image (need to change)
 #img_dir =
-img_path = 'C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\valid\\healthy125__jpg.rf.7764a1fa47190ada9968fb2b15814c25.jpg'
+img_path = 'C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v10i.coco-segmentation\\test\\spots.png'
 img = Image.open(img_path).convert('RGB')
 img_tensor = transform(img)
 
 # Predict the mask
 model = UNet().to(device)
 model.load_state_dict(torch.load("unet_best.pth", map_location=device))
+
 # Predict the mask and disease
 predicted_mask, predicted_disease = predict(img_tensor, model)
 
 # Map the predicted disease index to the disease name
 disease_mapping = {0: "healthy", 1: "maize-blight", 2: "maize-common-rust", 3: "maize-leaf-spot"}
-
-predicted_mask, predicted_disease = predict(img_tensor, model)
 disease_name = disease_mapping.get(predicted_disease, "Unknown")
 
 # Function to create prediction image
 def create_prediction_image(img_tensor, predicted_mask, disease_name):
     # Convert tensor to PIL image
-    to_pil = ToPILImage()
-    img_pil = to_pil(img_tensor.cpu()).convert("RGB")
+    img_pil = ToPILImage()(img_tensor.cpu()).convert("RGB")
 
-    # Initialize the composite image as just the original image
-    composite_image = img_pil
-
+    # Only add mask if disease is detected
     if disease_name != "healthy":
-        # Create a blank image with double width to hold both images side by side
-        composite_image = Image.new('RGB', (img_pil.width * 2, img_pil.height))
-        composite_image.paste(img_pil, (0, 0))
-
-        # Convert the predicted mask to a PIL image and resize to match the original image
-        mask_pil = to_pil(predicted_mask.cpu().squeeze()).convert("L")
+        mask_pil = ToPILImage()(predicted_mask.cpu().squeeze()).convert("L")
         mask_pil = mask_pil.resize(img_pil.size)
-
-        # Create a red mask
         mask_color = Image.new("RGB", mask_pil.size, (255, 0, 0))
         mask_pil_colored = ImageChops.multiply(mask_color, mask_pil.convert("RGB"))
-
-        # Combine original image and red mask
         img_with_mask = ImageChops.add(img_pil, mask_pil_colored)
+        composite_image = Image.new('RGB', (img_pil.width * 2, img_pil.height))
+        composite_image.paste(img_pil, (0, 0))
         composite_image.paste(img_with_mask, (img_pil.width, 0))
-
-    # Add titles
-    draw = ImageDraw.Draw(composite_image)
-    
-    if disease_name != "healthy":
-        draw.text((10, 10), "Original Image:", fill="black") #fill=white
-        draw.text((img_pil.width + 10, 10), f"Predicted Disease: {disease_name}", fill="black") #fill=white
     else:
-        draw.text((10, 10), "No Mask for Healthy Class. Leaf Inputted is Healthy.", fill="white") #fill=white
+        composite_image = img_pil
+
+    # Add text to the composite image
+    draw = ImageDraw.Draw(composite_image)
+    if disease_name != "healthy":
+        draw.text((10, 10), "Original Image:", fill="black")
+        draw.text((img_pil.width + 10, 10), f"Predicted Disease: {disease_name}", fill="black")
+    else:
+        draw.text((10, 10), "No Mask for Healthy Class. Leaf Inputted is Healthy.", fill="white")
 
     return composite_image
+    
 
 # Create and display the prediction image
 prediction_image = create_prediction_image(img_tensor, predicted_mask, disease_name)
