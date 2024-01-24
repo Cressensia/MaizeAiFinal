@@ -383,7 +383,7 @@ def train_model(model, train_loader, val_loader, segmentation_criterion, classif
     start_time = time.time()  # Record the start time
 
     # Define the switch point and schedulers
-    switch_epoch = int(num_epochs * 0.5)  # Example: Switch after 50% of epochs
+    #switch_epoch = int(num_epochs * 0.5)  # Example: Switch after 50% of epochs
 
     for epoch in range(num_epochs):
         model.train()
