@@ -1,0 +1,48 @@
+.all {
+  background: #ffffff;
+}
+
+.FieldTasselVisualization-container {
+  background: #ffffff;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  /* justify-content: center; */
+  text-align: center;
+  display: flex;
+  border-radius: 20px;
+}
+
+.FieldTasselVisualization-div {
+  background: #efefef;
+  height: 100vh;
+  /* width: 86%; */
+  width: auto;
+  border-radius: 20px;
+  flex-grow: 1;
+  /* justify-content: center; */
+}
+
+.FieldTasselVisualization-divField {
+  background: #ffffff;
+  height: 92%;
+  /* width: 98%; */
+  width: auto;
+  margin: 2%;
+  border-radius: 20px;
+  /* justify-content: center; */
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  flex-grow: 1;
+}
+
+.FieldTasselVisualization-divField h2 {
+  font-size: 1.2rem;
+  /* font-weight: ; */
+  font-family: "Roboto", sans-serif;
+  padding: 2%;
+  color: #000000;
+}

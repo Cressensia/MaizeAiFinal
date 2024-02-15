@@ -6,9 +6,6 @@
   justify-content: center;
   text-align: center;
   display: block;
-  /* flex-wrap: wrap; */ /* i removed this to put both the input and output side by side*/
-
-  
 } 
 
 .main-div {

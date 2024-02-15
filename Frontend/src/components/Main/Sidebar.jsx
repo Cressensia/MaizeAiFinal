@@ -1,102 +1,29 @@
-// import * as React from "react";
-// import List from "@mui/joy/List";
-// import ListItem from "@mui/joy/ListItem";
-// import ListItemButton from "@mui/joy/ListItemButton";
-// import ListItemDecorator from "@mui/joy/ListItemDecorator";
-// import Typography from "@mui/joy/Typography";
-// import "./Sidebar.css";
-// import DashboardIcon from "@mui/icons-material/Dashboard";
-// import AnalyticsIcon from "@mui/icons-material/Analytics";
-// import BugReportIcon from "@mui/icons-material/BugReport";
-// import VisibilityIcon from "@mui/icons-material/Visibility";
-// import Divider from "@mui/joy/Divider";
+import React from "react";
+import { Link } from 'react-router-dom';
 
-// export default function Sidebar() {
-//   const [open, setOpen] = React.useState(false);
+import "./Sidebar.css";
+import dashboardIcon from "../../images/dashboard.png";
+import A from "../../images/A.png";
+import paint from "../../images/paint.png";
+import moon from "../../images/moon.png";
+import fan from "../../images/fan.png";
 
-//   return (
-//     <React.Fragment>
-//       <div className="sidebar">
-//         <Typography component="div" className="sidebar-dashboard" style={{ fontWeight: 'bold' }}>
-//           Dashboard
-//         </Typography>
-//         <List>
-//           <ListItem>
-//             <ListItemButton>
-//               <ListItemDecorator>
-//                 <DashboardIcon />
-//               </ListItemDecorator>
-//               <Typography>Dashboard</Typography>
-//             </ListItemButton>
-//           </ListItem>
-//         </List>
-//         <Divider />
-//         <Typography component="div" className="sidebar-utilities" style={{ fontWeight: 'bold' }} >
-//           Utilities
-//         </Typography>
-//         <List>
-//           <ListItem>
-//             <ListItemButton>
-//               <ListItemDecorator>
-//                 <AnalyticsIcon />
-//               </ListItemDecorator>
-//               <Typography>Maize counter</Typography>
-//             </ListItemButton>
-//           </ListItem>
-//           <ListItem>
-//             <ListItemButton>
-//               <ListItemDecorator>
-//                 <BugReportIcon />
-//               </ListItemDecorator>
-//               <Typography>Maize Phenotype Analyzer</Typography>
-//             </ListItemButton>
-//           </ListItem>
-//           <ListItem>
-//             <ListItemButton>
-//               <ListItemDecorator>
-//                 <BugReportIcon />
-//               </ListItemDecorator>
-//               <Typography>Maize Disease Detector</Typography>
-//             </ListItemButton>
-//           </ListItem>
-//           <ListItem>
-//             <ListItemButton>
-//               <ListItemDecorator>
-//                 <VisibilityIcon />
-//               </ListItemDecorator>
-//               <Typography>Field Tassel Visualization</Typography>
-//             </ListItemButton>
-//           </ListItem>
-//         </List>
-//       </div>
-//     </React.Fragment>
-//   );
-// }
-
-import * as React from "react";
 import List from "@mui/joy/List";
 import ListItem from "@mui/joy/ListItem";
 import ListItemButton from "@mui/joy/ListItemButton";
 import ListItemDecorator from "@mui/joy/ListItemDecorator";
 import ListSubheader from "@mui/material/ListSubheader";
 import Typography from "@mui/joy/Typography";
-import "./Sidebar.css";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
-import BugReportIcon from "@mui/icons-material/BugReport";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import Divider from "@mui/joy/Divider";
 
 export default function Sidebar() {
-  const [open, setOpen] = React.useState(false);
-
   return (
     <React.Fragment>
       <div className="sidebar">
         <Typography
           component="div"
           className="sidebar-dashboard"
-          style={{ fontWeight: "bold" }}
+          // style={{ fontWeight: "bold" }}
         >
           Dashboard
         </Typography>
@@ -111,54 +38,67 @@ export default function Sidebar() {
           }
         >
           <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <DashboardIcon />
-              </ListItemDecorator>
-              <Typography>Dashboard</Typography>
-            </ListItemButton>
+            <Link to ="/Dashboard" className="link">
+              <ListItemButton>             
+                  <ListItemDecorator>
+                    <img src={dashboardIcon} alt="dashboard" />
+                  </ListItemDecorator>            
+                <Typography>Dashboard</Typography>
+              </ListItemButton>
+            </Link>
           </ListItem>
         </List>
         <Divider />
         <Typography
           component="div"
           className="sidebar-utilities"
-          style={{ fontWeight: "bold" }}
         >
           Utilities
         </Typography>
         <List>
           <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <AnalyticsIcon />
-              </ListItemDecorator>
-              <Typography>Maize counter</Typography>
-            </ListItemButton>
+            <Link to ="/MaizeCounter" className="link">
+              <ListItemButton>
+                <ListItemDecorator>
+                  {/* <AnalyticsIcon /> */}
+                  <img src={A} alt="A" />
+                </ListItemDecorator>
+                <Typography>Maize Counter</Typography>
+              </ListItemButton>
+            </Link>
           </ListItem>
           <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <BugReportIcon />
-              </ListItemDecorator>
-              <Typography>Maize Phenotype Analyzer</Typography>
-            </ListItemButton>
+            <Link to ="/MaizePhenotypeAnalyzer" className="link">
+              <ListItemButton>
+                <ListItemDecorator>
+                  {/* <BugReportIcon /> */}
+                  <img src={paint} alt="paint" />
+                </ListItemDecorator>
+                <Typography>Maize Phenotype Analyzer</Typography>
+              </ListItemButton>
+            </Link>
           </ListItem>
           <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <BugReportIcon />
-              </ListItemDecorator>
-              <Typography>Maize Disease Detector</Typography>
-            </ListItemButton>
+            <Link to ="/MaizeDiseaseIdentifier" className="link">
+              <ListItemButton>
+                <ListItemDecorator>
+                  {/* <BugReportIcon /> */}
+                  <img src={moon} alt="moon" />
+                </ListItemDecorator>
+                <Typography>Maize Disease Detector</Typography>
+              </ListItemButton>
+            </Link>
           </ListItem>
           <ListItem>
+          <Link to ="/FieldTasselVisualization" className="link">
             <ListItemButton>
               <ListItemDecorator>
-                <VisibilityIcon />
+                {/* <VisibilityIcon /> */}
+                <img src={fan} alt="fan" />
               </ListItemDecorator>
               <Typography>Field Tassel Visualization</Typography>
             </ListItemButton>
+            </Link>
           </ListItem>
         </List>
       </div>

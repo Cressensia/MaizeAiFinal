@@ -1,26 +1,37 @@
-// not is use. use Register3 instead
-
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
 import NavbarLogin from "./NavbarLogin";
-import DarkLogo from "../../images/plain-logo-darker.png";
 import "../../App.css";
-import "./Login.css";
-import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/joy/Stack";
-import FormControl from "@mui/material/FormControl";
+import {
+  CssBaseline,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  Box,
+  Link,
+  Container,
+} from "@mui/material";
+import circularLogo from "../../images/circularLogo.png";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import InputLabel from "@mui/material/InputLabel";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/joy/Button";
+
+import VerificationModal from "./VerificationModal";
+import { CognitoUser } from "amazon-cognito-identity-js";
+import UserPool from "../../UserPool";
 
 export default function Register() {
+  const theme = createTheme({
+    palette: {
+      custom: {
+        main: "#3B533A",
+      },
+    },
+  });
+
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -29,226 +40,266 @@ export default function Register() {
     event.preventDefault();
   };
 
-  const [registerRequest, setRegisterRequest] = useState({
-    email: "",
-    password: "",
-  });
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    console.log(`Name: ${name}, Value: ${value}`);
+  const [isVerificationModalClose, setIsVerificationModalClose] = useState(false);
 
-    setRegisterRequest((prev) => { 
-      return {
-        ...prev,
-        [name]: value
-      };
-    });
+  const openVerificationModal = () => {
+    setIsVerificationModalOpen(true);
   };
 
-  const EmailField = styled(TextField)({
-    "& label.Mui-focused": {
-      color: "#3B533A" // label color
-    },
-    "& .MuiOutlinedInput-root": {
-      "&.Mui-focused fieldset": {
-        borderColor: "#3B533A" // outline color
-      }
-    }
-  });
+  const closeVerificationModal = () => {
+    setIsVerificationModalOpen(false);
+  };
 
-  // change login button default color
-  const CreateButton = styled(Button)({
-    backgroundColor: "#3B533A",
-    "&:hover": {
-      backgroundColor: "#5f875e"
-    }
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const theme = createTheme({
-    palette: {
-      primary: {
-        main: "#3B533A"
-      }
-    },
-    components: {
-      MuiFormControl: {
-        styleOverrides: {
-          root: {
-            backgroundColor: "white" // background color
-          }
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+    return (
+      password.length >= minLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumber &&
+      hasSpecialChar
+    );
+  };
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+
+    // Prevent multiple submissions
+    if (isSubmitting) {
+        return;
+    }
+    setIsSubmitting(true); // Start of submission process
+
+    // Check if email and password are provided
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      setIsSubmitting(false); // Reset submission status
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      alert("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Proceed with UserPool signUp
+    UserPool.signUp(email, password, [], null, async (err, data) => {
+      if (err) {
+        if (err.code === "UsernameExistsException") {
+          alert("User already exists. Please verify your email.");
+          openVerificationModal(); // Reopen the modal for verification
+        } else if (err.code === "LimitExceededException") {
+          alert("Exceeded daily email limit for the operation or the account. Please try again later or contact support for assistance.");
+        } else {
+          console.error(err);
+          alert("An error occurred during registration. Please try again.");
         }
+        setIsSubmitting(false); // Reset submission status
+        return;
       }
-    }
-  });
 
-  const GrayCard = styled(Box)({
-    background: "#757975",
-    borderRadius: "10px",
-    width: "50ch",
-    height: "40ch",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    marginTop: "50px",
-    padding: "20px"
-  });
+      // Successful registration
+      const cognitoUser = new CognitoUser({
+        Username: data.user.getUsername(),
+        Pool: UserPool,
+      });
 
-  const Logo = styled("img")({
-    position: "absolute",
-    top: "-70px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    borderRadius: "50%",
-    backgroundColor: "#FFFFFF",
-    padding: "14px"
-  });
+      setUser(cognitoUser);
+      openVerificationModal();
+
+      const formData = new FormData();
+
+      formData.append("email", email);
+      formData.append("name", "User");
+
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/maizeai/save_user/",
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+        );
+
+        console.log("saved to mongo:", response.data);
+      } catch (e) {
+        console.error("error saving to mongo:", e);
+      }
+
+      setIsSubmitting(false); // Reset submission status
+    });
+};
+
+
 
   return (
     <div>
       <NavbarLogin />
-      <div className="login-container">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const formData = new FormData(event.currentTarget);
-            const formJson = Object.fromEntries(formData.entries());
-            alert(JSON.stringify(formJson));
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          style={{
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "#9FA59A",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <GrayCard>
-            <Logo src={DarkLogo} alt="logo" />
-            <Typography
-              variant="h6"
-              color="white"
+          <Container component="main" maxWidth="xs">
+            <Box
               sx={{
-                fontFamily: "Inter",
-                textAlign: "center",
-                marginBottom: "24px"
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              Create account
-            </Typography>
-            <Stack spacing={1}>         
-              <ThemeProvider theme={theme}>
-                {/* <FormControl  // old not working
-                  sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
-                  variant="outlined"
-                >
-                  <InputLabel htmlFor="outlined-search">
-                    Email
-                  </InputLabel>
-                  <OutlinedInput
-                    id="outlined-search"         
-                    name="email"
-                    onChange={handleInputChange}
-                    value={registerRequest.email}
-                    label="email"
-                  />
-                </FormControl> */}
-                  <FormControl
-                sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
-                variant="outlined"
+              <Paper
+                elevation={3}
+                style={{
+                  padding: "20px",
+                  width: "100%",
+                  position: "relative",
+                  overflow: "visible",
+                  borderRadius: "16px",
+                  marginTop: "60px",
+                  marginBottom: "60px",
+                }}
               >
-                <InputLabel htmlFor="outlined-search">
-                  Email
-                </InputLabel>
-                <OutlinedInput
-                  id="outlined-search"         
-                  name="email"
-                  // onChange={handleInputChange}
-                  // value={loginRequest.email}
-                  label="email"
-                />
-              </FormControl>
-              </ThemeProvider>
-              <ThemeProvider theme={theme}>
-                {/* <FormControl
-                  sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
-                  variant="outlined"
+                <Box
+                  style={{
+                    position: "absolute",
+                    top: "-40px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "80px",
+                    height: "80px",
+                  }}
                 >
-                  <InputLabel htmlFor="outlined-adornment-password">
-                    Password
-                  </InputLabel>
-                  <OutlinedInput
-                    id="outlined-adornment-password"
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    onChange={handleInputChange}
-                    value={registerRequest.password}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                    label="Password"
+                  <img
+                    src={circularLogo}
+                    alt="logo"
+                    style={{ width: "100%", height: "100%" }}
                   />
-                </FormControl> */}
-                <FormControl
-                sx={{ m: 1, width: "40ch", borderRadius: "10px" }}
-                variant="outlined"
-              >
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  id="outlined-adornment-password"
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  // onChange={handleInputChange}
-                  // value={loginRequest.password}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Password"
-                />
-              </FormControl>
-              </ThemeProvider>
-              <CreateButton type="submit">
-                <Link className="login-link" to="/Main">
+                </Box>
+                <Typography
+                  component="h1"
+                  variant="h5"
+                  style={{
+                    textAlign: "center",
+                    marginTop: "60px",
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                  }}
+                >
                   Create account
-                </Link>
-              </CreateButton>
-            </Stack>
-            <Typography
-              variant="body1"
-              color="white"
-              sx={{
-                fontFamily: "Inter",
-                marginTop: "18px",
-                textAlign: "center"
-              }}
-            >
-              <Link
-                className="register-link"
-                to="/Login"
-                style={{ textDecoration: "none", color: "white" }}
-              >
-                Already have an account?{" "}
-                <span style={{ color: "#ACBEFF" }}>Login</span>
-              </Link>
-            </Typography>
-          </GrayCard>
-        </form>
-      </div>
+                </Typography>
+                <form
+                  onSubmit={onSubmit}
+                  style={{
+                    width: "100%",
+                    marginTop: "20px",
+                  }}
+                  noValidate
+                >
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    autoFocus
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    disabled={isSubmitting}
+                    sx={{
+                      mt: 3,
+                      mb: 2,
+                      backgroundColor: "#3B533A",
+                    }}
+                  >
+                    Create account
+                  </Button>
+                  <Box
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginTop: "20px",
+                    }}
+                  >
+                    <Link
+                      href="/Login"
+                      variant="body2"
+                    >
+                      Already have an account? Login
+                    </Link>
+                  </Box>
+                </form>
+              </Paper>
+            </Box>
+          </Container>
+        </Box>
+      </ThemeProvider>
+      {isVerificationModalOpen && (
+        <VerificationModal
+          isOpen={isVerificationModalOpen}
+          onClose={closeVerificationModal}
+          user={user}
+          email={email}
+        ></VerificationModal>
+      )}
     </div>
   );
 }

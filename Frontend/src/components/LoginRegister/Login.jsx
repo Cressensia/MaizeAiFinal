@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // check auth success
+import { useNavigate, Link } from "react-router-dom";
 import NavbarLogin from "./NavbarLogin";
 import "../../App.css";
 import "./Login.css";
@@ -18,72 +18,54 @@ import Button from "@mui/joy/Button";
 
 import { CognitoUser, AuthenticationDetails } from "amazon-cognito-identity-js";
 import UserPool from "../../UserPool";
+import { useAuth } from "../../AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = React.useState(false);
-
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
+  const handleMouseDownPassword = (event) => event.preventDefault();
 
   const navigate = useNavigate();
-
-  // const [loginRequest, setLoginRequest] = useState({
-  //   email: "",
-  //   password: "",
-  // });
-
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   console.log(`Name: ${name}, Value: ${value}`);
-
-  //   setLoginRequest((prev) => {
-  //     return {
-  //       ...prev,
-  //       [name]: value
-  //     };
-  //   });
-  // };
+  const { setAuthInfo } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
-
-    // if (UserNotConfirmedException) {
-    //   alert("Please verify your email before logging in.");
-    // }
-
+  
     const user = new CognitoUser({
       Username: email,
       Pool: UserPool,
     });
-
+  
     const authDetails = new AuthenticationDetails({
       Username: email,
       Password: password,
     });
+  
+    try {
+      const data = await new Promise((resolve, reject) => {
+        user.authenticateUser(authDetails, {
+          onSuccess: async (data) => {
+            const authToken = data.idToken.jwtToken;;
+            setAuthInfo(authToken, email);
+            console.log(authToken, email);
 
-    user.authenticateUser(authDetails, {
-      onSuccess: (data) => {
-        console.log("onSuccess:", data);
-        navigate("/Main");
-        //need to change to verification modal
-        // nagivate("/VerificationModal")
-      },
-      onFailure: (err) => {
-        console.error("onFailure:", err);
-        alert("Authentication failed: Wrong username or password.");
-      },
-      newPasswordRequired: (data) => {
-        console.log("newPasswordRequired:", data);
-      },
-    });
+            localStorage.setItem('authToken', authToken);
+            localStorage.setItem('userEmail', email);
+
+            navigate("/MaizeCounter");
+          },
+          onFailure: reject,
+        });
+      });
+    } catch (error) {
+      console.error("onFailure:", error);
+      alert("Authentication failed: Wrong username or password.");
+    }
   };
-
+  
   const EmailField = styled(TextField)({
     "& label.Mui-focused": {
       color: "#3B533A", // label color
@@ -144,15 +126,7 @@ export default function Login() {
           The Future of Maize Tassel Monitoring: Your Fields, Your Data,
           Optimized Crop Yields
         </Typography>
-        <form
-          // onSubmit={(event) => {
-          //   event.preventDefault();
-          //   const formData = new FormData(event.currentTarget);
-          //   const formJson = Object.fromEntries(formData.entries());
-          //   alert(JSON.stringify(formJson));
-          // }}
-          onSubmit={onSubmit}
-        >
+        <form onSubmit={onSubmit}>
           <Stack spacing={1}>
             <ThemeProvider theme={theme}>
               <FormControl variant="filled" sx={{ m: 1, width: "40ch" }}>
@@ -235,9 +209,6 @@ export default function Login() {
                 />
               </FormControl>
             </ThemeProvider>
-            {/* <LoginButton type="submit">
-              <Link className="login-link">Login</Link>
-            </LoginButton> */}
             <LoginButton type="submit">Login</LoginButton>
           </Stack>
           <Typography
@@ -247,7 +218,7 @@ export default function Login() {
           >
             <Link
               className="register-link"
-              to="/Register3"
+              to="/Register"
               style={{ textDecoration: "none", color: "white" }}
             >
               New user? Create an account here!
