@@ -2,19 +2,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from torchvision import transforms
 from torchvision.transforms import ToPILImage
-import torchvision.transforms.functional as TF
-from torch.utils.data import DataLoader, Dataset
 from PIL import Image, ImageChops, ImageDraw
 import os
-import json
-from pycocotools.coco import COCO
 import numpy as np
-import random
-from torch.optim.lr_scheduler import ReduceLROnPlateau, OneCycleLR
-import time
 
 # %%
 num_classes = 4 # 3 diseases rn + healthy class
@@ -45,39 +36,7 @@ disease_mapping = {v: k for k, v in disease_to_id.items()}
 class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
-        '''
-        # Encoder (Contracting Path)
-        self.enc_conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
-        self.enc_bn1 = nn.BatchNorm2d(32)
-        self.enc_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.enc_bn2 = nn.BatchNorm2d(32)
-        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        # Middle part (Bottleneck)
-        self.middle_conv1 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.middle_bn1 = nn.BatchNorm2d(64)
-        self.middle_conv2 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
-        self.middle_bn2 = nn.BatchNorm2d(64)
-
-        # Decoder (Expansive Path)
-        self.up_conv1 = nn.ConvTranspose2d(64, 32, kernel_size=2, stride=2)
-        self.dec_conv1 = nn.Conv2d(64, 32, kernel_size=3, padding=1)
-        self.dec_bn1 = nn.BatchNorm2d(32)
-        self.dec_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.dec_bn2 = nn.BatchNorm2d(32)
-
-        # Dropout for regularization - Adjusted dropout rate
-        self.dropout = nn.Dropout(0.3)
-
-        # Final convolution
-        self.final_conv = nn.Conv2d(32, 1, kernel_size=1)
-
-        # Classification layers
-        self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc1 = nn.Linear(64, 64)
-        self.fc2 = nn.Linear(64, num_classes)
         
-        '''
         #reduced filters - slightly faster
         
         # Encoder
@@ -204,42 +163,18 @@ def create_prediction_image(img_tensor, predicted_mask, disease_name):
 
 # %%
 # Load Unet model
+
+dirname = os.path.dirname(__file__)
 device = torch.device('cpu')
 model = UNet().to(device)
-model.load_state_dict(torch.load("/Users/cressensia/Downloads/Maize-AI/Backend/MaizeAi/RCNN/unet_best.pth", map_location='cpu'))
+model.load_state_dict(torch.load(os.path.join(dirname, 'unet_best.pth'), map_location='cpu'))
 
 # %%
 import os
 from PIL import Image, ImageDraw
-from torchvision.transforms.functional import to_tensor, to_pil_image
+from torchvision.transforms.functional import to_tensor
 
-# def process_image_and_generate_prediction(input_image_path, output_dir='RCNN/outputDD', model=None):
-#     # Create output directory if it doesn't exist
-#     output_dir = os.path.join('MaizeAi', output_dir)
-#     os.makedirs(output_dir, exist_ok=True)
-
-#     # Load image
-#     img = Image.open(input_image_path).convert('RGB')
-#     img_tensor = to_tensor(img)
-
-#     # Generate model prediction
-#     predicted_mask, predicted_disease = predict(img_tensor, model)
-
-#     # Map predicted disease index to disease name
-#     disease_mapping = {0: "healthy", 1: "maize-blight", 2: "maize-common-rust", 3: "maize-leaf-spot"}
-#     disease_name = disease_mapping.get(predicted_disease, "Unknown")
-
-#     # Create prediction image
-#     prediction_image = create_prediction_image(img_tensor, predicted_mask, disease_name)
-
-#   # Save prediction image (prediction_<input image name>)
-#     output_path = os.path.join(output_dir, f"prediction_{os.path.basename(input_image_path)}")
-#     prediction_image.save(output_path)
-    
-#     # Return the path to the output image
-#     return output_path, disease_name
-
-def process_image_and_generate_prediction(input_image_path, output_dir='RCNN/outputDD'):
+def process_image_and_generate_prediction(input_image_path, output_dir='RCNN\outputDD'):
     # Create output directory if it doesn't exist
     output_dir = os.path.join('MaizeAi', output_dir)
     os.makedirs(output_dir, exist_ok=True)
@@ -269,5 +204,4 @@ def process_image_and_generate_prediction(input_image_path, output_dir='RCNN/out
 # Example use
 if __name__ == "__main__":
     process_image_and_generate_prediction('test.jpg', model=model)
-
 
