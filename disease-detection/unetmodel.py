@@ -6,24 +6,13 @@ from torchvision import transforms
 from torchvision.transforms import ToPILImage
 import torchvision.transforms.functional as TF
 from torch.utils.data import DataLoader, Dataset
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageChops
 import os
 import json
 from pycocotools.coco import COCO
 import numpy as np
-import random
-from torch.optim.lr_scheduler import ReduceLROnPlateau, OneCycleLR
-import time
-'''
-This model is a self-trained U-Net Model. 
-Current images trained:  items annotated + augmented on roboflow
-File: maize leaf - disease.v8.coco
-Current classes available:
-1. Maize Blight
-2. Common Rust
-3. Leaf Spot
-4. Healthy
-'''
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 num_classes = 4 # 3 diseases rn + healthy class
 
 #class names must be same as roboflow (i think category_id)
@@ -52,8 +41,8 @@ disease_mapping = {v: k for k, v in disease_to_id.items()}
 class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
-        '''
-        # Encoder (Contracting Path)
+        
+        # Encoder (Contracting Path) - Reduced number of filters for faster training
         self.enc_conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.enc_bn1 = nn.BatchNorm2d(32)
         self.enc_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
@@ -83,41 +72,6 @@ class UNet(nn.Module):
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc1 = nn.Linear(64, 64)
         self.fc2 = nn.Linear(64, num_classes)
-        
-        '''
-        #reduced filters - slightly faster
-        
-        # Encoder
-        self.enc_conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
-        self.enc_bn1 = nn.BatchNorm2d(16)
-        self.enc_conv2 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
-        self.enc_bn2 = nn.BatchNorm2d(16)
-        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        # Middle part (Bottleneck)
-        self.middle_conv1 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        self.middle_bn1 = nn.BatchNorm2d(32)
-        self.middle_conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.middle_bn2 = nn.BatchNorm2d(32)
-
-        # Decoder
-        self.up_conv1 = nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2)
-        self.dec_conv1 = nn.Conv2d(32, 16, kernel_size=3, padding=1)
-        self.dec_bn1 = nn.BatchNorm2d(16)
-        self.dec_conv2 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
-        self.dec_bn2 = nn.BatchNorm2d(16)
-
-        # Keep the dropout rate the same for now
-        self.dropout = nn.Dropout(0.3)
-
-        # Final convolution
-        self.final_conv = nn.Conv2d(16, 1, kernel_size=1)
-
-        # Classification layers - Adjusted to match the new filter sizes
-        self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc1 = nn.Linear(32, 32)
-        self.fc2 = nn.Linear(32, num_classes)
-        
 
     def forward(self, x):
         # Encoder
@@ -284,13 +238,13 @@ def create_dataset(image_dir, transform, disease_to_id):
         print(f"Error creating dataset: {e}")
         return None, None
 
-# Create the training and validation datasets (need to change)
-train_dataset, train_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v10i.coco-segmentation\\train', 
+# Create the training and validation datasets (paths need to be changed)
+train_dataset, train_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\train', 
     transform, 
     disease_to_id=disease_to_id
 )
 
-val_dataset, val_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v10i.coco-segmentation\\valid', 
+val_dataset, val_annotation_file = create_dataset('C:\\Users\\Jernis\\Documents\\FYP\\maize leaf - disease.v8i.coco-segmentation\\valid', 
                                                   transform, 
                                                   disease_to_id)
 
@@ -367,42 +321,43 @@ def validate_model(model, val_loader, segmentation_criterion, classification_cri
     return val_loss, val_acc, val_iou
 
 num_epochs = 100
-patience = 10
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-
+patience = 15
+optimizer = optim.AdamW(model.parameters(), lr=0.001)
 #find optimal learning rate - reduce learning rate when metric stops improving
-
-# Define the schedulers
-scheduler_plateau = ReduceLROnPlateau(optimizer, 'min', patience=5, factor=0.5)
-
+# Using ReduceLROnPlateau for dynamic LR adjustment
+scheduler = ReduceLROnPlateau(optimizer, 'min', patience=patience, factor=0.5)
 
 def train_model(model, train_loader, val_loader, segmentation_criterion, classification_criterion, optimizer, num_epochs, patience):
     best_loss = float('inf')
     epochs_no_improve = 0
-    start_time = time.time()  # Record the start time
-
-    # Define the switch point and schedulers
-    #switch_epoch = int(num_epochs * 0.5)  # Example: Switch after 50% of epochs
+    early_stop = False
 
     for epoch in range(num_epochs):
-        model.train()
+        if early_stop:
+            print("Early stopping initiated")
+            break
+
+        model.train()  # Set model to training mode
         running_loss = 0.0
         running_corrects = 0
         total_pixels = 0
         train_iou_sum = 0.0
 
         for inputs, masks, class_labels in train_loader:
+            # Reset gradients
             optimizer.zero_grad()
+            
+            # Forward pass
             segmentation_output, classification_output = model(inputs)
+            
+            # Calculate losses
             segmentation_loss = segmentation_criterion(segmentation_output, masks)
             classification_loss = classification_criterion(classification_output, class_labels)
             total_loss = segmentation_loss + classification_loss
+            
+            # Backward pass and optimization
             total_loss.backward()
             optimizer.step()
-
-            #if epoch < switch_epoch:
-                #scheduler_onecycle.step()
 
             # Update running loss and accuracy
             running_loss += total_loss.item() * inputs.size(0)
@@ -419,22 +374,21 @@ def train_model(model, train_loader, val_loader, segmentation_criterion, classif
         # Validate after each epoch
         val_loss, val_acc, val_iou = validate_model(model, val_loader, segmentation_criterion, classification_criterion)
 
-        #if epoch >= switch_epoch:
-            #scheduler_plateau.step(val_loss)
+        # Learning rate scheduler step
+        scheduler.step(val_loss)
 
-        scheduler_plateau.step(val_loss)
-        #scheduler_onecycle.step()
-
+        # Check if validation loss improved
         if val_loss < best_loss:
             best_loss = val_loss
             epochs_no_improve = 0
-            torch.save(model.state_dict(), 'unet_best.pth')
+            torch.save(model.state_dict(), 'unet_best.pth')  # Save the best model
+            
         else:
             epochs_no_improve += 1
             if epochs_no_improve == patience:
-                elapsed_time = time.time() - start_time  # Calculate elapsed time
-                print(f"Early stopping triggered after {epoch + 1} epochs! Time elapsed: {elapsed_time:.2f} seconds")
-                break
+                early_stop = True
+                print(f'Early stopping triggered after {epoch + 1} epochs!')
+        
         
         # Log epoch metrics
         print(f'Epoch {epoch + 1}/{num_epochs}')

@@ -1,100 +1,15 @@
-// import React, { useState } from "react";
-
-// export default function ModalUploadImage({ isOpen, onClose }) {
-//   const [selectedFiles, setSelectedFiles] = useState([]);
-
-//   const handleFileSelect = (event) => {
-//     setSelectedFiles([...selectedFiles, ...event.target.files]);
-//   };
-
-//   const handleFileRemove = (index) => {
-//     const newList = selectedFiles.filter((_, idx) => idx !== index);
-//     setSelectedFiles(newList);
-//   };
-
-//   const handleUpload = () => {
-    
-//     console.log("Files to upload:", selectedFiles);
-//     // onClose(); // Close the modal after upload
-//   };
-
-//   if (!isOpen) return null;
-
-//   return (
-//     <div style={styles.modalOverlay}>
-//       <div style={styles.modal}>
-//         <h2>Upload images</h2>
-//         <input
-//           type="file"
-//           multiple
-//           onChange={handleFileSelect}
-//           style={styles.fileInput}
-//         />
-//         <div style={styles.filePreviewContainer}>
-//           {selectedFiles.map((file, index) => (
-//             <div key={index} style={styles.filePreview}>
-//               <span>{file.name}</span>
-//               <button onClick={() => handleFileRemove(index)}>Remove</button>
-//             </div>
-//           ))}
-//         </div>
-//         <div style={styles.modalActions}>
-//           <button onClick={onClose}>Cancel</button>
-//           <button onClick={handleUpload}>Upload</button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// const styles = {
-//   modalOverlay: {
-//     position: "fixed",
-//     top: 0,
-//     left: 0,
-//     right: 0,
-//     bottom: 0,
-//     backgroundColor: "rgba(0, 0, 0, 0.5)",
-//     display: "flex",
-//     alignItems: "center",
-//     justifyContent: "center",
-//     zIndex: 1000,
-//   },
-//   modal: {
-//     backgroundColor: "#fff",
-//     padding: "20px",
-//     borderRadius: "10px",
-//     display: "flex",
-//     flexDirection: "column",
-//     alignItems: "center",
-//   },
-//   fileInput: {
-//     margin: "10px 0",
-//   },
-//   filePreviewContainer: {
-//     alignSelf: "stretch",
-//     marginBottom: "10px",
-//   },
-//   filePreview: {
-//     display: "flex",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     marginBottom: "5px",
-//   },
-//   modalActions: {
-//     display: "flex",
-//     justifyContent: "space-between",
-//     width: "100%",
-//   },
-// };
 import React, { useState } from "react";
 import axios from "axios";
-import UploadPic2 from "../../images/upload-pic2.png";
+import UploadPic from "../../images/upload-pic.png";
 import "./Modal.css";
+import { useAuth } from "../../AuthContext";
 
-export default function ModalUploadImage({ isOpen, onClose, onFileUpload }) {
+export default function ModalUploadImage({ isOpen, onClose, onUploadSuccess }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [images, setImages] = useState([]);
+
+  const { authInfo, setAuthInfo } = useAuth();
+  const { authToken, userEmail } = authInfo || {};
 
   const handleFileSelect = (e) => {
     setSelectedFiles([...selectedFiles, ...e.target.files]);
@@ -125,16 +40,20 @@ export default function ModalUploadImage({ isOpen, onClose, onFileUpload }) {
     setSelectedFiles([...selectedFiles, ...newFiles]);
   };
 
-
   const uploadImageToServer = async () => {
-    console.log(images)
+    console.log(images);
     const formData = new FormData();
 
     await Promise.all(
       selectedFiles.map(async (file, index) => {
         formData.append(`files`, file, file.name);
       })
-    );    
+    );   
+    
+    formData.append("userEmail", userEmail);
+    const currentDate = new Date();
+    const date = currentDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
+    formData.append("uploadDate", date)
 
     try {
       const response = await axios.post(
@@ -143,26 +62,14 @@ export default function ModalUploadImage({ isOpen, onClose, onFileUpload }) {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            "Authorization": authToken,
           },
         }
       );
-
-      const allData = {
-        originalImages: selectedFiles.map((file) => ({
-          filename: file.name,
-          blobUrl: URL.createObjectURL(file),
-        })),
-        processedResults: response.data.results,
-        total: response.data.total_count,
-      };
-
-      //setResults(response.data);
-      //setProcessedImage(response.data.image_data);
-      console.log("Results:", response.data.results);
-      console.log("Total count:", response.data.total_count);
-      //console.log(`Tassel count: ${response.data.tassel_count}`);
-
-      onFileUpload (allData);
+      
+      if(onUploadSuccess) {
+        onUploadSuccess();
+      }
     } catch (e) {
       console.error("Error uploading images:", e);
     }
@@ -174,7 +81,7 @@ export default function ModalUploadImage({ isOpen, onClose, onFileUpload }) {
   }
 
   if (!isOpen) return null;
-
+  
   return (
     <div className="modalOverlay">
       <div className="modal">
@@ -194,7 +101,7 @@ export default function ModalUploadImage({ isOpen, onClose, onFileUpload }) {
                   style={{ display: "none" }}
                   id="fileInput"
                 />
-                <img src={UploadPic2} alt="Upload" />
+                <img src={UploadPic} alt="Upload" />
                 <p>Drop or upload or images here (max 10 images per upload)</p>
               </div>
             </label>

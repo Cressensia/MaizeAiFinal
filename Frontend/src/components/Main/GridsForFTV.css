@@ -1,0 +1,71 @@
+.grids-for-ftv {
+  padding: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.plot-grid {
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0; 
+  border-radius: 16px; 
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  width: 300px; 
+  padding: 1.3rem;
+  margin-right: 1rem;
+}
+
+.plot-title {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333; 
+  font-size: 1rem; 
+}
+
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.circle.green {
+  background-color: #4CAF50;
+}
+
+.circle.orange {
+  background-color: #FF9800;
+}
+
+.circle.red {
+  background-color: #F44336;
+}
+
+.label {
+  text-align: center;
+} 
+
+.circle {
+  width: 75px; 
+  height: 75px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 1rem; 
+}
+
+.section-label {
+  text-align: center;
+  margin-top: 0.5rem; 
+  font-size: 0.875rem; 
+  color: #555;
+}

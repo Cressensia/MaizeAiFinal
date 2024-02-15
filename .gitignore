@@ -2,6 +2,7 @@ RCNN/data/
 RCNN/__pycache__/
 RCNN/roi/
 RCNN/*.pth
+RCNN/*.pt
 Mask RCNN/*.pth
 Mask RCNN/*.jpg
 Model inference/*.jpg
@@ -13,8 +14,10 @@ Model inference/output
 *.pth
 **/__pycache__/
 
+Backend/media
 RCNN/input/
 RCNN/output/
+RCNN/outputDD/
 YOLO/mtdc/
 YOLO/uav/
 YOLO/runs/
