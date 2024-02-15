@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Modal,
   ModalDialog,
@@ -8,11 +9,36 @@ import {
   Input,
   FormLabel,
 } from "@mui/joy";
+import { useAuth } from "../../AuthContext";
 
 function EditProfileSelf({ isOpen, onClose }) {
-  //   const [accountData, setAccountData] = useState([])
-  //   const [username, setUsername] = useState("");
-  //   const [fullName, setFullName] = useState("");
+  const [newName, setNewName] = useState("");
+  const { authInfo, setAuthInfo } = useAuth();
+  const { authToken, userEmail } = authInfo || {};
+
+  const handleSaveChanges = async () => {
+    const formData = new FormData();
+
+    formData.append("email", userEmail);
+    formData.append("name", newName);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/maizeai/manage_user/?email=${userEmail}`,
+          formData,
+          {
+            headers: { 
+              "Content-Type": "multipart/form-data",
+            },
+          }
+      );
+
+      console.log("changes saved successfully");
+      onClose();  // Close the modal after saving changes
+    } catch (e) {
+      console.error("error saving changes:", e);
+    }
+  };
 
   return (
     <Modal open={isOpen} onClose={onClose}>
@@ -21,8 +47,8 @@ function EditProfileSelf({ isOpen, onClose }) {
         <DialogContent>
           <FormLabel>Name</FormLabel>
           <Input
-          // value={}
-          // onChange={(e) => setUsername(e.target.value)}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
           />
           <FormLabel>Email address</FormLabel>
           <Input
@@ -38,7 +64,9 @@ function EditProfileSelf({ isOpen, onClose }) {
           <Button type="cancel" color="danger" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" color="success" >Save Changes</Button>
+          <Button type="submit" color="success"  onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
         </DialogContent>
       </ModalDialog>
     </Modal>

@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { CognitoUser } from "amazon-cognito-identity-js";
+import React, { useState } from "react";
 import {
   Modal,
   ModalDialog,
@@ -8,30 +6,12 @@ import {
   DialogContent,
   Button,
   Input,
-  FormLabel,
-  Textarea,
 } from "@mui/joy";
 
 import "./VerificationModal.css";
 
 function VerificationModal({ isOpen, onClose, user, email }) {
   const [OTP, setOTP] = useState("");
-
-  // const onSubmit = (event) => {
-  //   event.preventDefault();
-
-  //   // console.log(user)
-  //   user.confirmRegistration(OTP, true, (err, data) => {
-  //     if (err) {
-  //       console.log(err);
-  //       alert("Couldn't verify account, wrong OTP, try again");
-  //     } else {
-  //       console.log(data);
-  //       alert("Account verified successfully, please log in to continue");
-  //       window.location.href = "/Login";
-  //     }
-  //   });
-  // };
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -53,25 +33,6 @@ function VerificationModal({ isOpen, onClose, user, email }) {
     }
   };
 
-  // const verifyAccount = (e) => {
-  //   e.preventDefault();
-  //   const user = new CognitoUser({
-  //     Username: username,
-  //     Pool: UserPool,
-  //   });
-  //   console.log(user);
-  //   user.confirmRegistration(OTP, true, (err, data) => {
-  //     if (err) {
-  //       console.log(err);
-  //       alert("Couldn't verify account");
-  //     } else {
-  //       console.log(data);
-  //       alert('Account verified successfully');
-  //       window.location.href = '/login';
-  //     }
-  //   });
-  // };
-
   return (
     <>
       <Modal open={isOpen} onClose={onClose}>
@@ -83,18 +44,6 @@ function VerificationModal({ isOpen, onClose, user, email }) {
                 <p className="weHave">We have sent the code to your email</p>
                 <p className="emailUser">{email}</p>
               </div>
-              {/* <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  maxWidth: 300,
-                }}
-              >
-                <Input />
-                <Input />
-                <Input />
-                <Input />
-              </div> */}
               <div
                 style={{
                   display: "flex",

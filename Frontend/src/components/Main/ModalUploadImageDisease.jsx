@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
-import UploadPic from "../../images/upload-pic.png";
+import UploadPic2 from "../../images/upload-pic.png";
 import "./Modal.css";
 import { useAuth } from "../../AuthContext";
 
-export default function ModalUploadImage({ isOpen, onClose, onUploadSuccess }) {
+export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSuccess }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [images, setImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
   const { authInfo, setAuthInfo } = useAuth();
   const { authToken, userEmail } = authInfo || {};
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileSelect = (e) => {
-    setSelectedFiles([...selectedFiles, ...e.target.files]);
+    setSelectedFiles(e.target.files[0] ? [e.target.files[0]] : []);
   };
 
   const handleFileRemove = (index) => {
@@ -23,13 +22,15 @@ export default function ModalUploadImage({ isOpen, onClose, onUploadSuccess }) {
 
   const handleUpload = async () => {
     setIsLoading(true);
-    console.log("Files to upload:", selectedFiles);
-    const filesToUpload = [...selectedFiles];
-    await uploadImageToServer(filesToUpload);
-
-    setSelectedFiles([]); // clear selection
-    onClose(); // Close the modal after upload
-    setIsLoading(false);
+    if (selectedFiles.length > 0) {
+      // Upload the single selected file
+      await uploadImageToServer(selectedFiles[0]);
+      onClose();
+      setSelectedFiles([]);
+      setIsLoading(false);
+    } else {
+      console.error("No file selected for upload.");
+    }
   };
 
   const handleDrag = (e) => {
@@ -38,74 +39,66 @@ export default function ModalUploadImage({ isOpen, onClose, onUploadSuccess }) {
 
   const handleDrop = (e) => {
     e.preventDefault();
-
-    const newFiles = Array.from(e.dataTransfer.files);
-    setSelectedFiles([...selectedFiles, ...newFiles]);
+    const newFile = e.dataTransfer.files[0];
+    setSelectedFiles(newFile ? [newFile] : []);
   };
 
-  const uploadImageToServer = async () => {
-    console.log(images);
+  const uploadImageToServer = async (file) => {
     const formData = new FormData();
+    formData.append("image", file); 
 
-    await Promise.all(
-      selectedFiles.map(async (file, index) => {
-        formData.append(`files`, file, file.name);
-      })
-    );   
-    
     formData.append("userEmail", userEmail);
     const currentDate = new Date();
     const date = currentDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
     formData.append("uploadDate", date)
-
+  
     try {
       const response = await axios.post(
-        "http://localhost:8000/maizeai/image_upload_view/",
+        "http://localhost:8000/maizeai/upload_imageMaizeDisease/",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Authorization": authToken,
           },
         }
       );
-      
-      if (onUploadSuccess) {
+
+      if(onUploadSuccess) {
         onUploadSuccess();
       }
     } catch (e) {
-      console.error("Error uploading images:", e);
+      console.error("Error uploading image:", e);
     }
   };
 
   const handleCancel = () => {
     setSelectedFiles([]);
     onClose();
-  }
+  };
 
   if (!isOpen) return null;
-  
+
   return (
     <div className="modalOverlay">
       <div className="modal">
         <h2 className="upload-title">Upload images</h2>
-        <div
-            className="upload-div"
-            onDragOver={!isLoading ? handleDrag : null}
-            onDrop={!isLoading ? handleDrop : null}
-          >
+        <div 
+          className="upload-div" 
+          onDragOver={!isLoading ? handleDrag : null}
+          onDrop={!isLoading ? handleDrop : null}
+        >
           <label htmlFor="fileInput">
             <div className="image-div">
               <input
                 type="file"
                 accept="image/*"
-                multiple
+                // multiple
                 onChange={handleFileSelect}
                 disabled={isLoading}
                 style={{ display: "none" }}
                 id="fileInput"
               />
-              <img src={UploadPic} alt="Upload" />
+              <img src={UploadPic2} alt="Upload" />
               <p>Drop or upload or images here (max 10 images per upload)</p>
             </div>
           </label>
@@ -120,11 +113,11 @@ export default function ModalUploadImage({ isOpen, onClose, onUploadSuccess }) {
               />
               <div>
                 <span>{file.name}</span>
-                <button onClick={() => handleFileRemove(index)} disabled={isLoading}>Delete</button>
+                <button onClick={() => handleFileRemove(index) } disabled={isLoading}>Delete</button>
               </div>
             </div>
           ))}
-        </div>    
+        </div>
         <div className="modalActions">
           <button onClick={handleCancel} disabled={isLoading}>
             Cancel

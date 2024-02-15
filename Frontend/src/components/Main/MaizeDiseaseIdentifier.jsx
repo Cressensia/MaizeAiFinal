@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import NavbarMain from "./NavbarMain";
 import Sidebar from "./Sidebar";
-import "./Main2.css";
+import "./MaizeDiseaseIdentifier.css";
 import {
   Sheet,
   Table,
@@ -12,39 +13,44 @@ import {
   Divider,
 } from "@mui/joy";
 
-import ModalUploadImage from "./ModalUploadImage";
+import { useAuth } from "../../AuthContext";
+import ModalUploadImageDisease from "./ModalUploadImageDisease";
 
-export default function Main2() {
+export default function MaizeDiseaseIdentifier() {
   const [results, setResults] = useState([]);
+  const { authInfo, setAuthInfo } = useAuth();
+  console.log("Initial authInfo:", authInfo);
+  const { authToken, userEmail } = authInfo || {};
 
-  const deleteRecord = (index) => {
-    const updatedResults = [...results]; // duplicate current array
-    updatedResults.splice(index, 1);
-    setResults(updatedResults);
+  const deleteRecord = async (index) => {
+    try {
+      const documentId = results[index].document_id;
+      await axios.delete(`http://localhost:8000/maizeai/delete_record/disease/${documentId}`);
+      
+      const updatedResults = results.filter((_, i) => i !== index);
+      setResults(updatedResults);
+    } catch (e) {
+      console.error("Error deleting record:", e);
+    }
   };
 
-  const updateAssociatedPlots = (result) => {
-    // efdsfsdf
+  const getResultsByEmail = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/maizeai/get_results_by_email/?user_email=${userEmail}`);
+      setResults(response.data.disease_results);
+    } catch (e) {
+      console.error("Error fetching results:", e);
+    }
   };
+
+  useEffect(() => {
+    getResultsByEmail();
+  }, [authToken, userEmail]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
-  const handleFileUpload = (allData) => {
-    const newResults = allData.originalImages.map((result, index) => ({
-      originalImage: result.blobUrl,
-      processedImage: allData.processedResults[index].image_data,
-      tassel_count: allData.processedResults[index].tassel_count,
-      dateOfUpload: new Date().toLocaleDateString(),
-      associatedPlots: "", // not yet implemented
-      total_count: allData.total,
-    }));
-
-    setResults((prevResults) => [...prevResults, ...newResults]);
-    closeModal(); // Close the modal after upload
-  };
 
   //preview image
   const [previewImage, setPreviewImage] = useState(null);
@@ -60,6 +66,11 @@ export default function Main2() {
     setIsPreviewOpen(false);
   };
 
+  const openUpdateModal = (index) => {
+    setSelectedResultIndex(index);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="all">
       <NavbarMain />
@@ -69,7 +80,7 @@ export default function Main2() {
         </div>
         <div className="main2-div">
           <div className="main2-divMaize">
-            <h2>Maize Counter</h2>
+            <h2>Maize Disease Detector</h2>
             <button className="uploadImageButton " onClick={openModal}>
               Upload Image
             </button>
@@ -84,53 +95,36 @@ export default function Main2() {
                   border: "2px solid rgba(0, 0, 0, 0.05)",
                 }}
               >
-                {/* <Sheet > */}
                 <Table variant="outline" stickyHeader hoverRows>
                   <thead>
                     <tr className="table-header">
                       <th>No.</th>
                       <th>Image</th>
                       <th>Date of upload</th>
-                      <th>Results</th>
-                      <th>Tassel Counts</th>
-                      <th>Associated plots</th>
+                      <th>Maize Disease Results</th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody className="result-list">
-                    {results.map((result, index) => (
+                  {Array.isArray(results) && results.map((result, index) => (
                       <tr key={index}>
                         <td>{index + 1}</td>
                         <td>
                           <img
                             className="result-image"
-                            src={result.originalImage}
+                            src={result.original_image}
                             alt={`Original image ${index + 1}`}
-                            onClick={() => openPreview(result.originalImage)}
+                            onClick={() => openPreview(result.image)}
                           />
                         </td>
-                        <td>{result.dateOfUpload}</td>
-                        <td>
-                          <img
-                            className="result-image"
-                            src={`data:image/jpeg;base64, ${result.processedImage}`}
-                            alt={`Processed image ${index + 1}`}
-                            onClick={() => openPreview(result.originalImage)}
-                          />
-                        </td>
-                        <td>{result.tassel_count}</td>
-                        <td>{result.associatedPlots}</td>
+                        <td>{result.upload_date}</td>
+                        <td>{result.disease_type}</td>
                         <td>
                           <Dropdown>
                             <MenuButton>...</MenuButton>
                             <Menu>
                               <MenuItem onClick={() => deleteRecord(index)}>
                                 Delete Record
-                              </MenuItem>
-                              <MenuItem
-                                onClick={() => updateAssociatedPlots(result)}
-                              >
-                                Update associated plots
                               </MenuItem>
                             </Menu>
                           </Dropdown>
@@ -144,10 +138,10 @@ export default function Main2() {
           </div>
         </div>
       </div>
-      <ModalUploadImage
+      <ModalUploadImageDisease
         isOpen={isModalOpen}
         onClose={closeModal}
-        onFileUpload={handleFileUpload}
+        onUploadSuccess={getResultsByEmail}
       />
       {isPreviewOpen && (
         <div className="image-preview-modal-overlay" onClick={closePreview}>
@@ -166,7 +160,6 @@ export default function Main2() {
           </div>
         </div>
       )}
-    
     </div>
   );
 }

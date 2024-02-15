@@ -31,7 +31,8 @@
 }
 
 .nav-logo {
-  height: 48px;
+  height: 40px;
+  width: auto;
   margin-left: 32px;
   justify-self: start;
   cursor: pointer;
@@ -43,7 +44,7 @@
   height: 80px;
 }
 
-.nav-links {
+.nav-links { 
   color: #ffffff;
   font-family: "Inter";
   font-size: 16px;

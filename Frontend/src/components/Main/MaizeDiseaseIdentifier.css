@@ -1,7 +1,3 @@
-/* .table {
-  flex-grow: 1;
-} */
-
 .all {
   background: #ffffff;
 }
@@ -156,4 +152,3 @@
   cursor: pointer;
   align-self: flex-end;
 }
-/*------- ------------ ------*/
