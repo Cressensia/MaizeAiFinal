@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import UploadPic2 from "../../images/upload-pic.png";
+import UploadPic from "../../images/upload-pic.png";
 import "./Modal.css";
 import { useAuth } from "../../AuthContext";
 
@@ -98,7 +98,7 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
                 style={{ display: "none" }}
                 id="fileInput"
               />
-              <img src={UploadPic2} alt="Upload" />
+              <img src={UploadPic} alt="Upload" />
               <p>Drop or upload or images here (max 10 images per upload)</p>
             </div>
           </label>

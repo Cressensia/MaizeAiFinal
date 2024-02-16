@@ -16,10 +16,13 @@
     "axios": "^1.6.2",
     "chart.js": "^4.4.1",
     "csbbust": "1.0.1",
+    "highcharts": "^11.3.0",
+    "highcharts-react-official": "^3.2.1",
     "loader-utils": "3.2.1",
     "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "18.2.0",
+    "react-helmet": "^6.1.0",
     "react-router-dom": "6.16.0",
     "react-scripts": "5.0.1"
   },

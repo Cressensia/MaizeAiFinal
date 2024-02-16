@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import NavbarMain from "./NavbarMain";
 import Sidebar from "./Sidebar";
+import Weather from "../Widget/Weather";
 
 import "./Dashboard.css";
 
@@ -115,28 +116,25 @@ export default function Dashboard() {
                 <div className="main2-div">
                 <div className="main2-divMaize">
                     <h2>Dashboard</h2>
-                    <Divider />
-                    <h2>Total Maize Count : {totalCount}</h2>
-                    <div className="table">
-                    <Sheet
-                        sx={{
-                        height: 400,
-                        overflow: "auto",
-                        borderRadius: 10,
-                        border: "2px solid rgba(0, 0, 0, 0.05)",
-                        }}
-                    >
+                    <Divider />               
+                    <div className="table">         
+                    <h2>Total Maize Count : {totalCount}</h2>         
                         <Table variant="outline" stickyHeader hoverRows>
-                        <thead>
+                            <thead>
                             <tr className="table-header">
                                 <div style={{ width: '80%', margin: '0 auto' }}>
                                     <Bar data={data} options={options}/>
                                 </div>
                             </tr>
                             </thead>
-                        </Table>
-                    </Sheet>
-                    </div>
+                        </Table>   
+                        <br/><br/><br/>
+                        <Divider />
+                        <br/><br/><br/>
+                        <Weather />  
+                        <br/><br/><br/>
+                        <Divider />    
+                    </div>                           
                 </div>
                 </div>
             </div>

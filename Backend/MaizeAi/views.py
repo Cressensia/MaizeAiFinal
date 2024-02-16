@@ -47,7 +47,7 @@ def upload_to_s3(local_path, s3_bucket, s3_key):
         print("credentials not found")
 
 def delete_from_s3(s3_bucket, key):
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
     s3.delete_object(Bucket=s3_bucket, Key=key)
 
 def get_s3_url(s3_bucket, key, region='ap-southeast-1'):
