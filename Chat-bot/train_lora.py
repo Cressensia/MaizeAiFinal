@@ -24,7 +24,7 @@ DEFAULT_UNK_TOKEN = "<unk>"
 
 @dataclass
 class ModelArguments:
-    model_name_or_path: Optional[str] = field(default="facebook/opt-125m")
+    model_name_or_path: Optional[str] = field(default="llama/llama-2.7b")
 
 
 @dataclass
