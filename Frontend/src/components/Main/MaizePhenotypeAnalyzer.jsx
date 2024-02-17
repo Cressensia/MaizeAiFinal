@@ -105,9 +105,9 @@ export default function MaizePhenotypeAnalyzer() {
                             </td>
                             <td>
                                 <div>
-                                    <div>{`R ${result.dominant_color[0]}`}</div>
-                                    <div>{`G ${result.dominant_color[1]}`}</div>
-                                    <div>{`B ${result.dominant_color[2]}`}</div>
+                                    <div>{`R ${result.dominant_color_rgb[0]}`}</div>
+                                    <div>{`G ${result.dominant_color_rgb[1]}`}</div>
+                                    <div>{`B ${result.dominant_color_rgb[2]}`}</div>
                                 </div>
                             </td>
                             <td>
@@ -115,7 +115,7 @@ export default function MaizePhenotypeAnalyzer() {
                                 style={{
                                     width: '20px',
                                     height: '20px',
-                                    backgroundColor: `rgb(${result.dominant_color.join(", ")})`,
+                                    backgroundColor: `rgb(${result.dominant_color_rgb.join(", ")})`,
                                     borderRadius: '50%'
                                 }}
                                 ></div>

@@ -121,18 +121,19 @@ yolo_detect(os.path.join(dirname, 'input'))
 
 # %%
 # Find the dominant color in the image and return it in HSV space
-def get_dominant_color_hsv(region):
+def get_dominant_color(region):
         # Convert the region to HSV color space
-        region_hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
+        region_hsv = cv2.cvtColor(region, cv2.COLOR_RGB2HSV)
         
         # Filter out black pixels
         non_black_pixels = (region_hsv[..., 2] != 0)
         region_without_black = region_hsv[non_black_pixels]
-
+        non_black_pixels_rgb = np.all(region != [0, 0, 0], axis=-1)
+        region_without_black_rgb = region[non_black_pixels_rgb]
         # Calculate the mean color in HSV space
         dominant_color_hsv = np.mean(region_without_black, axis=0)
-        
-        return dominant_color_hsv
+        dominant_color_rgb = np.mean(region_without_black_rgb, axis=0).astype(int)
+        return dominant_color_hsv, dominant_color_rgb
 
 # Min-max normalization for a list of Hu moments
 def min_max_normalize_hu_moments(hu_moments):
@@ -189,7 +190,7 @@ def find_outliers_combined_iqr(hu_moments_list):
     return outliers
 
 # YOLO segmentation
-def yolo_segment(input_directory, output_directory=os.path.join(dirname, 'output')):
+def yolo_segment(input_directory, output_directory='output'):
     result_list = []
     # List all image files in the input directory
     image_files = [f for f in os.listdir(input_directory) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
@@ -223,26 +224,26 @@ def yolo_segment(input_directory, output_directory=os.path.join(dirname, 'output
             # Cut mask region
             img_numpy = np.array(img)
             masked_image = cv2.bitwise_and(img_numpy, img_numpy, mask=binary_mask)
-            masked_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2RGB)
-
+            masked_image_rgb = cv2.cvtColor(masked_image, cv2.COLOR_BGR2RGB)
             # Get dominant color info
-            dominant_color = get_dominant_color_hsv(masked_image)
+            dominant_color_hsv, dominant_color_rgb = get_dominant_color(masked_image_rgb)
             
             # Get image moments
             hu_moments = cv2.HuMoments(cv2.moments(binary_mask)).flatten()
             hu_moments_normalized = min_max_normalize_hu_moments(hu_moments)
             hu_sum = np.sum(hu_moments_normalized)
-
+            
             # Save result
             result_list.append({
                 'filename': image_file,
-                'dominant_color': dominant_color,
+                'dominant_color_hsv': dominant_color_hsv,
+                'dominant_color_rgb': dominant_color_rgb,
                 'hu_moments': hu_moments_normalized,
                 'hu_moments_sum': hu_sum,
             })
 
     # Detect color outliers
-    dominant_colors = np.array([entry['dominant_color'] for entry in result_list])
+    dominant_colors = np.array([entry['dominant_color_hsv'] for entry in result_list])
     col_indices = [0, 1, 2]
     lower_multipliers = [3, 3, 2]
     upper_multipliers = [3, 3, 0]
@@ -252,21 +253,16 @@ def yolo_segment(input_directory, output_directory=os.path.join(dirname, 'output
     hu_moments_idx = [entry['hu_moments_sum'] for entry in result_list]
     shape_outliers = find_outliers_combined_iqr(hu_moments_idx)
 
-    # Save result list to JSON file for color outliers 
+    # Save result list to JSON file for color outliers
+    output_directory = "output"  
     os.makedirs(output_directory, exist_ok=True)
     analysis_folder = os.path.join(output_directory, 'Outliers')
     os.makedirs(analysis_folder, exist_ok=True)
 
     for i in range(len(result_list)):
         if color_outliers[i] or shape_outliers[i]:
-            # save roi to s3
-            roi_path = os.path.join(output_directory, 'ROI', result_list[i]['filename'])
-            s3_key = f"{user_email}/output/ROI/{result_list[i]['filename']}"
-            upload_to_s3(roi_path, bucket, s3_key)
-            s3_url = get_s3_url(bucket, s3_key)
-            result_list[i]['s3_url'] = s3_url
-
-            result_list[i]['dominant_color'] = result_list[i]['dominant_color'].tolist()
+            result_list[i]['dominant_color_hsv'] = result_list[i]['dominant_color_hsv'].tolist()
+            result_list[i]['dominant_color_rgb'] = result_list[i]['dominant_color_rgb'].tolist()
             result_list[i]['color_diff'] = str(color_outliers[i])
             result_list[i]['shape_diff'] = str(shape_outliers[i])
 
