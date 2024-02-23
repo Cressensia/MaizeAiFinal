@@ -261,6 +261,12 @@ def yolo_segment(input_directory, output_directory='output'):
 
     for i in range(len(result_list)):
         if color_outliers[i] or shape_outliers[i]:
+            roi_path = os.path.join(output_directory, 'ROI', result_list[i]['filename'])
+            s3_key = f"{user_email}/output/ROI/{result_list[i]['filename']}"
+            upload_to_s3(roi_path, bucket, s3_key)
+            s3_url = get_s3_url(bucket, s3_key)
+            result_list[i]['s3_url'] = s3_url
+
             result_list[i]['dominant_color_hsv'] = result_list[i]['dominant_color_hsv'].tolist()
             result_list[i]['dominant_color_rgb'] = result_list[i]['dominant_color_rgb'].tolist()
             result_list[i]['color_diff'] = str(color_outliers[i])
