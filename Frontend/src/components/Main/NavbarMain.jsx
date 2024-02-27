@@ -13,7 +13,8 @@ export default function NavbarMain() {
   const [userInfo, setUserInfo] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalClose, setIsModalClose] = useState(false);
-  
+  const [letter, setLetter] = useState("");
+
   const { authInfo, setAuthInfo } = useAuth();
   const { authToken, userEmail } = authInfo || {};
   const navigate = useNavigate();
@@ -24,9 +25,10 @@ export default function NavbarMain() {
     if (user) {
       try {
         const response = await axios.get(
-          `http://localhost:8000/maizeai/manage_user/?email=${userEmail}`
+          `https://api.maizeai.uk/maizeai/manage_user/?email=${userEmail}`
         );
         setUserInfo(response.data);
+        setLetter(userInfo.name.charAt(0));
       } catch (e) {
         console.error("Error fetching user details:", e);
       }
@@ -35,7 +37,7 @@ export default function NavbarMain() {
 
   useEffect(() => {
     fetchUserDetails();
-  }, [userEmail]);
+  }, [userEmail, userInfo]);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -61,29 +63,34 @@ export default function NavbarMain() {
         <Link to="/Dashboard">
           <img className="nav2-logo" src={logo2Main} />
         </Link>
-        <Dropdown className="menu">
-          <MenuButton>
-            <div>
-              <Avatar />
-            </div>
-            {userInfo.name}
-          </MenuButton>
-          <Menu>
-            <MenuItem>
+        <div className="userTabSquare">
+          <Dropdown className="menu">
+            <MenuButton>
               <div>
-                <Avatar />
+                <Avatar>
+                  {letter}
+                </Avatar>
               </div>
               {userInfo.name}
-              <br></br>
-              {/* {profileTypeMap[accountData.p_id]} */} Manager
-            </MenuItem>
-            <MenuItem onClick={() => setIsModalOpen(true)}>
-              Edit Account
-            </MenuItem>
-            <MenuItem onClick={Logout}>Logout </MenuItem>
-          </Menu>
-        </Dropdown>
+            </MenuButton>
+            <Menu>
+              <MenuItem>
+                <div>
+                  <Avatar>{letter}</Avatar>
+                </div>
+                {userInfo.name}
+                <br></br>
+                {/* {profileTypeMap[accountData.p_id]} */}
+              </MenuItem>
+              <MenuItem onClick={() => setIsModalOpen(true)}>
+                Edit Account
+              </MenuItem>
+              <MenuItem onClick={Logout}>Logout </MenuItem>
+            </Menu>
+          </Dropdown>
+        </div>
       </div>
+
       {isModalOpen && (
         <EditProfileSelf
           isOpen={isModalOpen}
@@ -91,9 +98,7 @@ export default function NavbarMain() {
             setIsModalOpen(false);
             fetchUserDetails();
           }}
-
-        >
-        </EditProfileSelf>
+        ></EditProfileSelf>
       )}
     </div>
   );

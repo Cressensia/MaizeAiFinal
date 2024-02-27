@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 
 import "./Sidebar.css";
@@ -17,9 +17,23 @@ import Typography from "@mui/joy/Typography";
 import Divider from "@mui/joy/Divider";
 
 export default function Sidebar() {
+
+  const [isOpen, setIsOpen] = useState(true);
+
+  const toggle = () => {
+    setIsOpen(!isOpen);
+    // console.log("Sidebar state: ", isOpen);
+  }; 
+
+  const sidebarStyle = {
+    width: isOpen ? "210px" : "50px", 
+    transition: "width 0.5s",
+  };
+
   return (
     <React.Fragment>
-      <div className="sidebar">
+      <div className="sidebar" style={sidebarStyle}>
+      <button onClick={toggle} className="sidebar-toggle">{isOpen ? 'Close' : 'Open'} </button>
         <Typography
           component="div"
           className="sidebar-dashboard"
@@ -63,7 +77,7 @@ export default function Sidebar() {
                   {/* <AnalyticsIcon /> */}
                   <img src={A} alt="A" />
                 </ListItemDecorator>
-                <Typography>Maize Counter</Typography>
+                <Typography>Maize counter</Typography>
               </ListItemButton>
             </Link>
           </ListItem>
@@ -105,3 +119,5 @@ export default function Sidebar() {
     </React.Fragment>
   );
 }
+
+

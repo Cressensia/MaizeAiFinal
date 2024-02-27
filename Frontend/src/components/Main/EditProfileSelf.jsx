@@ -24,7 +24,7 @@ function EditProfileSelf({ isOpen, onClose }) {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/maizeai/manage_user/?email=${userEmail}`,
+        `https://api.maizeai.uk/maizeai/manage_user/?email=${userEmail}`,
           formData,
           {
             headers: { 

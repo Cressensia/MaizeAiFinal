@@ -65,7 +65,7 @@ export default function FieldTasselVisualization() {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/maizeai/get_results_by_email/?user_email=${userEmail}`);
+      const response = await axios.get(`https://api.maizeai.uk/maizeai/get_results_by_email/?user_email=${userEmail}`);
       console.log('API response:', response.data.counter_results);
   
       // only those with a plot_name then will be in results

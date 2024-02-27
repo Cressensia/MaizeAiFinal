@@ -11,6 +11,8 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    width: auto;
+    height: auto;
 }
   
 .modal {
@@ -19,12 +21,15 @@
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /* align-items: center; */
     font-family: "Roboto";
 }
 
 .upload-title {
-    text-align: left;
+    text-align: left ;
+    font-size: 20px;
+    padding-bottom: 4%;
+    padding-top: 1%;
 }
   
 .fileInput {
@@ -44,20 +49,87 @@
     align-items: center;
     margin-bottom: 5px;
     font-size: 12px;
+    /* justify-content: flex-start;  */
+}
+
+.filePreview span { 
+    margin-right: auto; 
+    
+}
+
+.filePreview button { 
+    /* margin-right: 23px;  */
+    /* text-align: left; */
+    background-color: #1C5D3B; 
+    color: white;
+    border-radius: 5px;
+    width: auto;
 }
   
 .modalActions {
     display: flex;
     justify-content: space-between;
     width: 100%;
+
 }
 
 .upload-div {
     border-radius: 10px;
     border: 2px dashed #749289;
+    width: auto;
+    height: 180px;
+}
+
+.upload-div p{
+    text-align: center;
+    padding-right: 20px;
+    padding-left: 20px;
+    font-size: 10px;
+
 }
 
 .image-preview {
     width: 70px;
     height: 50px;
 }
+
+.upload-icon {
+    width: 30px !important;
+    height: 35px !important;
+}
+
+.modalActions button {
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Specific styling for the cancel button */
+.modalActions button:first-child {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+/* Specific styling for the upload button */
+.modalActions button:last-child {
+    background-color: #1C5D3B; 
+    border: 1px solid #000000;
+    color: white;
+}
+
+/* Hover effects */
+.modalActions button:hover {
+    opacity: 0.8;
+}
+
+/* Disabled button styling */
+.modalActions button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+

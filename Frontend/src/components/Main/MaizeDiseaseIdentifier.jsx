@@ -25,7 +25,7 @@ export default function MaizeDiseaseIdentifier() {
   const deleteRecord = async (index) => {
     try {
       const documentId = results[index].document_id;
-      await axios.delete(`http://localhost:8000/maizeai/delete_record/disease/${documentId}`);
+      await axios.delete(`https://api.maizeai.uk/maizeai/delete_record/disease/${documentId}`);
       
       const updatedResults = results.filter((_, i) => i !== index);
       setResults(updatedResults);
@@ -36,7 +36,7 @@ export default function MaizeDiseaseIdentifier() {
 
   const getResultsByEmail = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/maizeai/get_results_by_email/?user_email=${userEmail}`);
+      const response = await axios.get(`https://api.maizeai.uk/maizeai/get_results_by_email/?user_email=${userEmail}`);
       setResults(response.data.disease_results);
     } catch (e) {
       console.error("Error fetching results:", e);
@@ -114,7 +114,7 @@ export default function MaizeDiseaseIdentifier() {
                             className="result-image"
                             src={result.original_image}
                             alt={`Original image ${index + 1}`}
-                            onClick={() => openPreview(result.image)}
+                            onClick={() => openPreview(result.original_image)}
                           />
                         </td>
                         <td>{result.upload_date}</td>

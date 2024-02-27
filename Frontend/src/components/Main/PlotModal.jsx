@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./Modal.css";
+import "./PlotModal.css";
 
 export default function PlotModal({ isOpen, onClose, onUpdatePlots, result }) {
   const [plotName, setPlotName] = useState("");
@@ -15,7 +15,7 @@ export default function PlotModal({ isOpen, onClose, onUpdatePlots, result }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/maizeai/update_plots/",
+        "https://api.maizeai.uk/maizeai/update_plots/",
         formData,
         {
           headers: {
@@ -43,7 +43,7 @@ export default function PlotModal({ isOpen, onClose, onUpdatePlots, result }) {
   return (
     <div className="modalOverlay">
       <div className="modal">
-        <h2 className="update-title">Update Associated Plots</h2>
+        <h3 className="update-title">Update Associated Plots</h3>
         <div className="form-group">
           <label htmlFor="plotName">Associated Plot Name:</label>
           <input
@@ -57,7 +57,7 @@ export default function PlotModal({ isOpen, onClose, onUpdatePlots, result }) {
           <label htmlFor="section">Section:</label>
           <select
             id="section"
-            value={selectedSection}
+            value={selectedSection}s
             onChange={(e) => setSelectedSection(e.target.value)}
           >
             <option value="">Select Section</option>

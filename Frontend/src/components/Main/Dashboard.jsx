@@ -3,6 +3,7 @@ import axios from "axios";
 import NavbarMain from "./NavbarMain";
 import Sidebar from "./Sidebar";
 import Weather from "../Widget/Weather";
+import EdenAI from "../Widget/EdenAI";
 
 import "./Dashboard.css";
 
@@ -44,7 +45,7 @@ export default function Dashboard() {
 
     const fetchTotalCount = async () => {
         try {
-        const response = await axios.get(`http://localhost:8000/maizeai/get_total_count/?user_email=${userEmail}`);
+        const response = await axios.get(`https://api.maizeai.uk/maizeai/get_total_count/?user_email=${userEmail}`);
         setTotalCount(response.data.total_count);
         } catch (error) {
         console.error('Error fetching total count:', error);
@@ -54,7 +55,7 @@ export default function Dashboard() {
     const fetchMonthlyCount = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:8000/maizeai/get_monthly_count/?user_email=${userEmail}`
+            `https://api.maizeai.uk/maizeai/get_monthly_count/?user_email=${userEmail}`
           );
           setMonthlyCount(response.data.monthly_count);
           setLoading(false);
@@ -118,7 +119,7 @@ export default function Dashboard() {
                     <h2>Dashboard</h2>
                     <Divider />               
                     <div className="table">         
-                    <h2>Total Maize Count : {totalCount}</h2>         
+                        <h2>Total Maize Count : {totalCount}</h2>         
                         <Table variant="outline" stickyHeader hoverRows>
                             <thead>
                             <tr className="table-header">
@@ -130,10 +131,11 @@ export default function Dashboard() {
                         </Table>   
                         <br/><br/><br/>
                         <Divider />
-                        <br/><br/><br/>
+                        <br/><br/><br/>     
                         <Weather />  
                         <br/><br/><br/>
-                        <Divider />    
+                        <Divider />  
+                        <EdenAI /> 
                     </div>                           
                 </div>
                 </div>

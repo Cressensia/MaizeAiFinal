@@ -1,3 +1,102 @@
 .all {
-    background: #ffffff;
-  }
+  background: #ffffff;
+}
+
+.eden-ai-container {
+  padding-top: 5%;
+}
+
+.image-divq > img {
+  align-content: left;
+  width: 70px;
+  height: 70px;
+  justify-content: left;
+  margin-left: 40%;
+  display: flex;
+}
+
+.button > button {
+  font-family: "Inter";
+  color: #ffffff;
+  background: #636f5d;
+  border-radius: 8px;
+  border-style: none;
+  box-shadow: rgba(255, 255, 255, 0.35) 0 1px 2px inset;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+.button > button:hover {
+  background: #717e6c;
+}
+
+.lolol {
+  position: relative;
+}
+
+.image-div {
+  align-content: left !important;
+  width: 10px;
+  height: 60px;
+  justify-content: left;
+  display: flex;
+}
+
+.lolol p {
+  font-size: 10px;
+}
+
+.poop {
+  display: block;
+  width: 500px;
+  cursor: pointer;
+  height: auto;
+}
+
+.question-submit-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  margin-left: 1%;
+}
+
+.question-input {
+  flex-grow: 0;
+  margin-right: 10px;
+  width: 460px;
+}
+
+.reset-button2 {
+  position: absolute;
+  background: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  right: 0;
+}
+
+.content-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.answer-box111 {
+  width: 330px;
+  height: 100px;
+  margin-left: 20px;
+} 
+
+.finallyplss{
+  display: flex;
+  margin-top: 10px;
+  margin-left: 1%;
+}

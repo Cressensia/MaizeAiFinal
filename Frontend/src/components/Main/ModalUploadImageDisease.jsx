@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import UploadPic from "../../images/upload-pic.png";
+import UploadPic2 from "../../images/upload-pic.png";
 import "./Modal.css";
 import { useAuth } from "../../AuthContext";
 
@@ -9,7 +9,6 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
   const [images, setImages] = useState([]);
   const { authInfo, setAuthInfo } = useAuth();
   const { authToken, userEmail } = authInfo || {};
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileSelect = (e) => {
     setSelectedFiles(e.target.files[0] ? [e.target.files[0]] : []);
@@ -21,13 +20,11 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
   };
 
   const handleUpload = async () => {
-    setIsLoading(true);
     if (selectedFiles.length > 0) {
       // Upload the single selected file
       await uploadImageToServer(selectedFiles[0]);
       onClose();
       setSelectedFiles([]);
-      setIsLoading(false);
     } else {
       console.error("No file selected for upload.");
     }
@@ -54,7 +51,7 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
   
     try {
       const response = await axios.post(
-        "http://localhost:8000/maizeai/upload_imageMaizeDisease/",
+        "https://api.maizeai.uk/maizeai/upload_imageMaizeDisease/",
         formData,
         {
           headers: {
@@ -82,11 +79,7 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
     <div className="modalOverlay">
       <div className="modal">
         <h2 className="upload-title">Upload images</h2>
-        <div 
-          className="upload-div" 
-          onDragOver={!isLoading ? handleDrag : null}
-          onDrop={!isLoading ? handleDrop : null}
-        >
+        <div className="upload-div" onDragOver={handleDrag} onDrop={handleDrop}>
           <label htmlFor="fileInput">
             <div className="image-div">
               <input
@@ -94,11 +87,10 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
                 accept="image/*"
                 // multiple
                 onChange={handleFileSelect}
-                disabled={isLoading}
                 style={{ display: "none" }}
                 id="fileInput"
               />
-              <img src={UploadPic} alt="Upload" />
+              <img src={UploadPic2} alt="Upload" class="upload-icon" />
               <p>Drop or upload or images here (max 10 images per upload)</p>
             </div>
           </label>
@@ -113,18 +105,15 @@ export default function ModalUploadImageDisease({ isOpen, onClose, onUploadSucce
               />
               <div>
                 <span>{file.name}</span>
-                <button onClick={() => handleFileRemove(index) } disabled={isLoading}>Delete</button>
+                <button onClick={() => handleFileRemove(index)}>Delete</button>
               </div>
             </div>
           ))}
         </div>
+
         <div className="modalActions">
-          <button onClick={handleCancel} disabled={isLoading}>
-            Cancel
-          </button>
-          <button onClick={handleUpload} disabled={isLoading}>
-            {isLoading ? "Uploading..." : "Upload"}
-          </button>
+          <button onClick={handleCancel}>Cancel</button>
+          <button onClick={handleUpload}>Upload</button>
         </div>
       </div>
     </div>
