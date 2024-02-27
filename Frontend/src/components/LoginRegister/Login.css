@@ -1,5 +1,5 @@
 .login-container {
-  height: 92vh;
+  height: 90%;
   width: 100%;
   position: relative;
   display: flex;
@@ -7,9 +7,12 @@
   justify-content: flex-start;
   align-items: center;
   background: #9fa59a;
+  
 }
 
-.login-container > form {
+
+
+ /* .login-container > form {
   font-family: "Inter", sans-serif;
   margin-top: 90px;
   font-size: 20px;
@@ -18,5 +21,54 @@
 .login-link {
   text-decoration: none;
   color: inherit;
-} 
+}   */
 
+
+
+ /* .login-container {
+  height: 90%;
+  width: 100%;
+  max-width: 500px; 
+  margin: auto; 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background: #9fa59a;
+  padding: 20px; 
+  box-sizing: border-box; 
+}
+
+
+
+.login-container > form {
+  width: 100%; 
+  font-family: "Inter", sans-serif;
+  margin-top: 20px; 
+  font-size: 1rem; 
+}
+
+.register-link, .login-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    width: 90%; 
+  }
+
+  .login-container > form {
+    font-size: 0.9rem; 
+  }
+
+  .MuiFormControl-root {
+    width: calc(100% - 20px) !important; 
+    margin: 10px !important; 
+  }
+
+  .MuiButton-root {
+    font-size: 0.8rem; 
+}
+}  */

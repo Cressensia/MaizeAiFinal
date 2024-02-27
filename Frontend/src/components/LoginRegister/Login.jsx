@@ -55,7 +55,7 @@ export default function Login() {
             localStorage.setItem('authToken', authToken);
             localStorage.setItem('userEmail', email);
 
-            navigate("/MaizeCounter");
+            navigate("/Dashboard");
           },
           onFailure: reject,
         });
@@ -101,6 +101,7 @@ export default function Login() {
     },
   });
 
+
   return (
     <div>
       <NavbarLogin />  
@@ -121,7 +122,7 @@ export default function Login() {
         <Typography
           variant="h6"
           color="white"
-          sx={{ fontFamily: "Inter", marginTop: "10px", textAlign: "center", fontSize: "19px"}}
+          sx={{ fontFamily: "Inter", marginTop: "10px", textAlign: "center", fontSize: "19px" , paddingBottom: "5%"}}
         >
           The Future of Maize Tassel Monitoring: Your Fields, Your Data,
           Optimized Crop Yields
