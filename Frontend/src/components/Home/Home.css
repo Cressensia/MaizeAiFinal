@@ -3,7 +3,7 @@
 
 .landingone-container {
   /*background-image: url("../images/maizetassel-background-landing.png");*/
-  box-shadow: inset 0 0 0 500px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 500px rgba(0, 0, 0, 0.6);
   height: 92vh;
   width: 100%;
   position: relative;
@@ -133,7 +133,7 @@ p {
     display: flex;
     position: relative;
     justify-content: center;
-    padding: 24px 48px;
+    padding: 12px 24px;
   }
 
   .landingtwo-div-left {
@@ -173,17 +173,60 @@ p {
   .landingtwo-div-right > p {
     margin-top: 14px;
     text-transform: capitalize;
+    text-align: left;
   }
 }
 
+@media screen and (max-width: 580px) {
+  .landingtwo-div {
+    display: flex; 
+    flex-direction: column;
+    align-items: center; 
+    padding: 6px 10px;
+  }
+
+  .landingtwo-div-left,
+  .landingtwo-div-right {
+    width: 100%; 
+    text-align: left; 
+    margin: 0 0 20px 0;
+  }
+
+  .landingtwo-div-left > h1 {
+    font-family: "Playfair Display";
+    font-size: 48px;
+    white-space: nowrap;
+  }
+
+  .landingtwo-div-left > h3 {
+    font-family: "Inter";
+    font-size: 21px;
+  }
+
+  .landingtwo-div-right > h4,
+  p {
+    font-size: 14px;
+    font-family: "Inter";
+    line-height: 1.5;
+  }
+
+  .landingtwo-div-right > p {
+    margin-top: 14px;
+    text-transform: capitalize;
+    text-align: left;
+  }
+}
+
+
 /* Landing3 */
 .landing3-container {
-  background: #9fa59a;
-  color: #ffffff;
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
   height: 100vh;
   width: 100%;
-  position: relative;
-  justify-content: center;
+  background: #9fa59a;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -194,14 +237,38 @@ p {
   height: 97%;
 }
 
+@media (max-width: 768px) {
+  .landing3-container > img {
+    width: 100%;
+    height: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing3-container > img {
+    width: 100%;
+    height: 70%;
+    margin: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .landing3-container > img {
+    width: 100%;
+    height: 50%;
+    margin: auto;
+  }
+}
+
 /* Landing4 */
 .landing4-container {
-  background: #9fa59a;
-  color: #ffffff;
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
   height: 100vh;
   width: 100%;
-  position: relative;
-  justify-content: center;
+  background: #9fa59a;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -210,4 +277,27 @@ p {
   padding-top: 24px;
   width: 64%;
   height: 97%;
+}
+
+@media (max-width: 768px) {
+  .landing4-container > img {
+    width: 100%;
+    height: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing4-container > img {
+    width: 100%;
+    height: 70%;
+    margin: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .landing4-container > img {
+    width: 100%;
+    height: 50%;
+    margin: auto;
+  }
 }

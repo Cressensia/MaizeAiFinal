@@ -1,6 +1,6 @@
 import React from "react";
 import "./Home.css";
-import MaizeBackground from "../../images/maizetassel-background-landing.png";
+import MaizeBackground from "../../images/maize-landing.jpg";
 import PlainLogo from "../../images/plain-logo.png";
 
 export default function Landing1() {
