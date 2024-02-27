@@ -127,7 +127,7 @@ export default function Register() {
 
       try {
         const response = await axios.post(
-          "http://localhost:8000/maizeai/save_user/",
+          "http://api.maizeai.uk/maizeai/save_user/",
             formData,
             {
               headers: {
