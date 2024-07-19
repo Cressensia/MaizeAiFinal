@@ -16,3 +16,9 @@ here's the website:
 https://www.maizeai.uk/
 
 Note: Please contact me if you wish to use the features! I will rehost the backend on EC2.
+
+
+--------------------------------------------------------------------
+
+Demo vid:
+https://youtu.be/ptB3ye_6L2o
